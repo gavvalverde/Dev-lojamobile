@@ -1,2 +1,2 @@
 # Dev-lojamobile
-Loja online do trabalho da aual de quarta
+Loja online do trabalho da aula de quarta-feira
