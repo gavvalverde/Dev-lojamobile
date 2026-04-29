@@ -1,0 +1,24 @@
+{
+  "files.exclude": {
+    "**/app-example": false,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/build": true,
+    "**/.expo": true,
+    "**/.gitignore": true,
+    "**/app.json": true,
+    "**/README.md": true,
+    "**/expo-env.d.ts": true,
+    "**/assets": true,
+    "**/package-lock.json": true,
+    "**/tsconfig.json": true,
+    "**/package.json": true,
+    "**/eslint.config.js": true
+  },
+  "prettier.singleAttributePerLine": false,
+  "prettier.printWidth": 200,
+  "prettier.jsxBracketSameLine": true,
+  "prettier.proseWrap": "never",
+  "prettier.trailingComma": "none"
+}
