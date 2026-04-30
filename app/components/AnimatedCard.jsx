@@ -14,6 +14,8 @@ export function AnimatedCard({
   cardWidth,
   cardHeight,
   onPress,
+  onFavoritePress,
+  isFavorite = false,
   formatCardCode,
 }) {
   const opacity = useState(new Animated.Value(0))[0];
@@ -53,6 +55,27 @@ export function AnimatedCard({
           style={[styles.image, { height: cardHeight }]}
         />
 
+        <TouchableOpacity
+          style={[
+            styles.favoriteButton,
+            isFavorite && styles.favoriteButtonActive,
+          ]}
+          activeOpacity={0.85}
+          onPress={(event) => {
+            event.stopPropagation();
+            onFavoritePress?.();
+          }}
+        >
+          <Text
+            style={[
+              styles.favoriteText,
+              isFavorite && styles.favoriteTextActive,
+            ]}
+          >
+            {isFavorite ? "Salvo" : "Fav"}
+          </Text>
+        </TouchableOpacity>
+
         <View style={styles.cardInfo}>
           <Text numberOfLines={1} style={styles.cardName}>
             {item.name}
@@ -68,12 +91,35 @@ export function AnimatedCard({
 
 const styles = StyleSheet.create({
   card: {
+    position: "relative",
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#fff",
     elevation: 3,
   },
   image: { width: "100%" },
+  favoriteButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    minWidth: 48,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
+    alignItems: "center",
+  },
+  favoriteButtonActive: {
+    backgroundColor: "#ef5350",
+  },
+  favoriteText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#ef5350",
+  },
+  favoriteTextActive: {
+    color: "#fff",
+  },
   cardInfo: { padding: 8 },
   cardName: { fontSize: 13, fontWeight: "600", color: "#333" },
   cardCode: { fontSize: 11, color: "#777", marginTop: 2 },

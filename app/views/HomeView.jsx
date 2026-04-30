@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { AnimatedCard } from "../components/AnimatedCard";
 import { BannerCarousel } from "../components/BannerCarousel";
+import { FavoritesService } from "../services/FavoritesService";
 import { PokemonService } from "../services/PokemonService";
 
 export default function HomeView() {
@@ -31,6 +32,7 @@ export default function HomeView() {
   const [filteredCards, setFilteredCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [favorites, setFavorites] = useState([]);
 
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -38,6 +40,11 @@ export default function HomeView() {
 
   useEffect(() => {
     fetchCards();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = FavoritesService.subscribe(setFavorites);
+    return unsubscribe;
   }, []);
 
   const fetchCards = async () => {
@@ -111,6 +118,8 @@ export default function HomeView() {
       cardWidth={cardWidth}
       cardHeight={cardHeight}
       formatCardCode={formatCardCode}
+      isFavorite={favorites.some((favorite) => favorite.id === item.id)}
+      onFavoritePress={() => FavoritesService.toggleFavorite(item)}
       onPress={() => router.push(`/views/CardDetailsView?id=${item.id}`)}
     />
   );
@@ -128,6 +137,13 @@ export default function HomeView() {
     <View style={styles.screen}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Minha Loja Pokémon</Text>
+        <TouchableOpacity
+          style={styles.favoritesButton}
+          onPress={() => router.push("/views/FavoritesView")}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.favoritesButtonText}>Favoritos</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -172,8 +188,26 @@ export default function HomeView() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#f5f6fa" },
-  header: { padding: 16, backgroundColor: "#fff", elevation: 4 },
+  header: {
+    padding: 16,
+    backgroundColor: "#fff",
+    elevation: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   headerText: { fontSize: 22, fontWeight: "bold", color: "#222" },
+  favoritesButton: {
+    backgroundColor: "#ef5350",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  favoritesButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
   searchInput: {
     backgroundColor: "#fff",
     marginBottom: 12,
