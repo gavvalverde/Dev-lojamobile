@@ -1,8 +1,7 @@
-import * as FileSystem from "expo-file-system/legacy";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
 const STORAGE_KEY = "yellowduck:favorites";
-const STORAGE_FILE = `${FileSystem.documentDirectory || ""}favorites.json`;
 
 const listeners = new Set();
 let favorites = [];
@@ -51,12 +50,7 @@ async function readFavorites() {
       return Array.isArray(parsed) ? parsed : [];
     }
 
-    if (!FileSystem.documentDirectory) return [];
-
-    const file = await FileSystem.getInfoAsync(STORAGE_FILE);
-    if (!file.exists) return [];
-
-    const stored = await FileSystem.readAsStringAsync(STORAGE_FILE);
+    const stored = await AsyncStorage.getItem(STORAGE_KEY);
     const parsed = stored ? JSON.parse(stored) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
@@ -74,9 +68,7 @@ async function writeFavorites() {
       return;
     }
 
-    if (FileSystem.documentDirectory) {
-      await FileSystem.writeAsStringAsync(STORAGE_FILE, serialized);
-    }
+    await AsyncStorage.setItem(STORAGE_KEY, serialized);
   } catch (error) {
     console.error("Erro ao salvar favoritos:", error);
   }

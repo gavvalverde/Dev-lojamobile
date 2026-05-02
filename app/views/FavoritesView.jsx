@@ -20,11 +20,16 @@ const saleOptions = [
 ];
 
 const languageOptions = ["Portugues", "Ingles", "Japones", "Espanhol", "Frances"];
-const qualityOptions = ["M", "NM", "LP", "MP", "HP", "DMG"];
+const qualityOptions = ["NM", "LP", "MP", "HP", "DMG"];
 
 function formatMoneyInput(value) {
   const digits = String(value ?? "").replace(/\D/g, "");
-  const cents = Number(digits || "0");
+  let cents = Number(digits || "0");
+  
+  // Se tem 2 ou menos dígitos, é reais direto (não centavos)
+  if (digits.length <= 2) {
+    cents = cents * 100;
+  }
 
   return (cents / 100).toLocaleString("pt-BR", {
     style: "currency",
@@ -40,7 +45,8 @@ function normalizeMoneyValue(value) {
     });
   }
 
-  const text = String(value ?? "");
+  if (!value || value === "" || value === "undefined") return "R$ 0,00";
+  const text = String(value);
   return text.startsWith("R$") ? text : formatMoneyInput(text);
 }
 
@@ -56,6 +62,7 @@ export default function FavoritesView() {
   const spacing = 12;
   const cardWidth = (width - spacing * (numColumns + 1)) / numColumns;
   const cardHeight = cardWidth / 0.716;
+  const saleLabel = draft?.aVenda ? "Sim" : "Nao";
 
   useEffect(() => {
     const unsubscribe = FavoritesService.subscribe(setFavorites);
@@ -87,6 +94,12 @@ export default function FavoritesView() {
 
   const saveEditor = () => {
     if (editingItem && draft) {
+      // Validar preço
+      const priceText = String(draft.price ?? "").replace(/\D/g, "");
+      if (!priceText || priceText === "0") {
+        alert("Por favor, insira um preço válido");
+        return;
+      }
       FavoritesService.updateFavorite(editingItem.id, draft);
     }
     closeEditor();
@@ -94,6 +107,13 @@ export default function FavoritesView() {
 
   const renderDropdown = (field, label, selectedLabel, options) => {
     const isOpen = openDropdown === field;
+    const normalizedOptions = options.map((option) => {
+      if (typeof option === "string") {
+        return { label: option, value: option };
+      }
+
+      return { label: option.label, value: option.value };
+    });
 
     return (
       <View style={styles.field}>
@@ -109,26 +129,19 @@ export default function FavoritesView() {
 
         {isOpen && (
           <View style={styles.dropdownList}>
-            {options.map((option) => {
-              const optionLabel =
-                typeof option === "string" ? option : option.label;
-              const optionValue =
-                typeof option === "string" ? option : option.value;
-
-              return (
-                <TouchableOpacity
-                  key={optionLabel}
-                  style={styles.dropdownOption}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    setDraft((current) => ({ ...current, [field]: optionValue }));
-                    setOpenDropdown(null);
-                  }}
-                >
-                  <Text style={styles.dropdownOptionText}>{optionLabel}</Text>
-                </TouchableOpacity>
-              );
-            })}
+            {normalizedOptions.map((option) => (
+              <TouchableOpacity
+                key={option.label}
+                style={styles.dropdownOption}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setDraft((current) => ({ ...current, [field]: option.value }));
+                  setOpenDropdown(null);
+                }}
+              >
+                <Text style={styles.dropdownOptionText}>{option.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
       </View>
@@ -157,6 +170,10 @@ export default function FavoritesView() {
       </TouchableOpacity>
     </View>
   );
+
+  const aVendaDropdown = draft ? renderDropdown("aVenda", "Item a venda", saleLabel, saleOptions) : null;
+  const idiomaDropdown = draft ? renderDropdown("idioma", "Idioma", draft.idioma, languageOptions) : null;
+  const qualidadeDropdown = draft ? renderDropdown("qualidade", "Qualidade", draft.qualidade, qualityOptions) : null;
 
   return (
     <View style={styles.screen}>
@@ -215,13 +232,7 @@ export default function FavoritesView() {
               {editingItem?.name}
             </Text>
 
-            {draft &&
-              renderDropdown(
-                "aVenda",
-                "Item a venda",
-                draft.aVenda ? "Sim" : "Nao",
-                saleOptions
-              )}
+            {aVendaDropdown}
 
             <View style={styles.field}>
               <Text style={styles.inputLabel}>Preco</Text>
@@ -239,21 +250,9 @@ export default function FavoritesView() {
               />
             </View>
 
-            {draft &&
-              renderDropdown(
-                "idioma",
-                "Idioma",
-                draft.idioma,
-                languageOptions
-              )}
+            {idiomaDropdown}
 
-            {draft &&
-              renderDropdown(
-                "qualidade",
-                "Qualidade",
-                draft.qualidade,
-                qualityOptions
-              )}
+            {qualidadeDropdown}
 
             <View style={styles.modalActions}>
               <TouchableOpacity
