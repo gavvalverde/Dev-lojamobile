@@ -110,7 +110,7 @@ export default function ContatoFormView() {
       </View>
 
       <Button mode="contained" onPress={salvar} style={styles.botao}>
-        Salvar
+        <Text>Salvar</Text>
       </Button>
     </View>
   );

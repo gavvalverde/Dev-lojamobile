@@ -1,4 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ContatoEntity from "../entities/ContatoEntity";
+
+const STORAGE_KEY = "@contatos";
 
 let contatos = [
   new ContatoEntity(
@@ -34,24 +37,51 @@ let contatos = [
 ];
 
 export default class ContatoService {
-  static findAll() {
-    return Promise.resolve([...contatos]);
-  }
 
-  static findById(id) {
-    const contato = contatos.find((item) => item.id === String(id));
-    return Promise.resolve(contato ?? null);
-  }
+  static async findAll() {
+    const json = await AsyncStorage.getItem(STORAGE_KEY);
 
-  static save(contato) {
-    const index = contatos.findIndex((item) => item.id === contato.id);
-
-    if (index >= 0) {
-      contatos[index] = contato;
-    } else {
-      contatos.push(contato);
+    if (json) {
+      const lista = JSON.parse(json);
+      contatos = lista.map((item) => ContatoEntity.transforme(item));
+      return [...contatos];
     }
 
-    return Promise.resolve(contato);
+    // primeira execução
+    //await this.saveAll(contatos);
+    //return [...contatos];
+    return [];
+  }
+
+  static async findById(id) {
+    const lista = await this.findAll();
+    return lista.find((item) => item.id === String(id)) ?? null;
+  }
+
+  static async save(contato) {
+    const lista = await this.findAll();
+
+    const index = lista.findIndex((item) => item.id === contato.id);
+
+    if (index >= 0) {
+      lista[index] = contato;
+    } else {
+      lista.push(contato);
+    }
+
+    contatos = lista;
+
+    await this.saveAll(lista);
+
+    return contato;
+  }
+
+  static async saveAll(lista) {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+  }
+
+  static async clear() {
+    await AsyncStorage.removeItem(STORAGE_KEY);
+    contatos = [];
   }
 }
