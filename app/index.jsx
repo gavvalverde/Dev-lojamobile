@@ -1,5 +1,5 @@
-import HomeView from "./views/HomeView";
+import { Redirect } from "expo-router";
 
 export default function Index() {
-  return <HomeView />;
+  return <Redirect href="/views/HomeView" />;
 }

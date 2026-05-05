@@ -1,186 +1,201 @@
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
 } from "react-native";
-import { AnimatedCard } from "../components/AnimatedCard";
-import { BannerCarousel } from "../components/BannerCarousel";
+import { CardSearchResult } from "../components/CardSearchResult";
+import { CartModal } from "../components/CartModal";
+import TopDropDownMenu from "../components/TopDropDownMenu";
+import { AnuncioService } from "../services/AnuncioService";
+import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
 import { PokemonService } from "../services/PokemonService";
+
+function formatCurrency(value) {
+  return (Number(value) || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
 
 export default function HomeView() {
   const { width } = useWindowDimensions();
   const router = useRouter();
 
-  const numColumns = Math.max(
-    2,
-    width > 900 ? 4 : width > 600 ? 3 : 2
-  );
-
+  const numColumns = Math.max(2, width > 900 ? 4 : width > 600 ? 3 : 2);
   const spacing = 12;
   const cardWidth = (width - spacing * (numColumns + 1)) / numColumns;
   const cardHeight = cardWidth / 0.716;
 
-  const [cards, setCards] = useState([]);
-  const [filteredCards, setFilteredCards] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [favorites, setFavorites] = useState([]);
-
-  const [page, setPage] = useState(1);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [showLoadMore, setShowLoadMore] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [search, setSearch] = useState("");
+  const [apiCards, setApiCards] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [cartVisible, setCartVisible] = useState(false);
 
   useEffect(() => {
-    fetchCards();
+    const unsubscribeFavorites = FavoritesService.subscribe(setFavorites);
+    const unsubscribeCart = CartService.subscribe(setCartItems);
+
+    return () => {
+      unsubscribeFavorites();
+      unsubscribeCart();
+    };
   }, []);
 
   useEffect(() => {
-    const unsubscribe = FavoritesService.subscribe(setFavorites);
-    return unsubscribe;
-  }, []);
+    const term = search.trim();
 
-  const fetchCards = async () => {
-    try {
-      const produtos = await PokemonService.fetchCards(30, 1);
-      setCards(produtos);
-      setFilteredCards(produtos);
-    } catch (e) {
-      console.error('Erro ao carregar cartas:', e);
-    } finally {
-      setLoading(false);
+    if (!term) {
+      setApiCards([]);
+      setSearchError("");
+      setSearchLoading(false);
+      return;
     }
-  };
 
-  const fetchCardsByName = async (name) => {
-    try {
-      setLoading(true);
-      const produtos = await PokemonService.searchCardsByName(name);
-      setFilteredCards(produtos);
-    } catch (e) {
-      console.error('Erro ao buscar cartas:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
+    let active = true;
+    setSearchLoading(true);
+    setSearchError("");
 
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      if (!search.trim()) {
-        setFilteredCards(cards);
-      } else {
-        fetchCardsByName(search);
+    const timeout = setTimeout(async () => {
+      try {
+        const cards = await PokemonService.searchCards(term);
+        if (active) setApiCards(cards);
+      } catch (error) {
+        console.error("Erro ao buscar cartas na API:", error);
+        if (active) {
+          setApiCards([]);
+          setSearchError("Nao foi possivel buscar cartas agora.");
+        }
+      } finally {
+        if (active) setSearchLoading(false);
       }
-    }, 400);
+    }, 450);
 
-    return () => clearTimeout(delay);
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+    };
   }, [search]);
 
-  const loadMore = async () => {
-    if (loadingMore) return;
-
-    setLoadingMore(true);
-    const nextPage = page + 1;
-
-    try {
-      const novosProdutos = await PokemonService.fetchCards(30, nextPage);
-      const newCards = [...cards, ...novosProdutos];
-
-      setCards(newCards);
-      if (!search.trim()) setFilteredCards(newCards);
-
-      setPage(nextPage);
-    } catch (e) {
-      console.error('Erro ao carregar mais:', e);
-    } finally {
-      setLoadingMore(false);
-      setShowLoadMore(false);
+  const cardResults = useMemo(() => {
+    if (search.trim()) {
+      return AnuncioService.buildSearchResults(apiCards, favorites);
     }
-  };
+
+    return AnuncioService.buildCatalogResults(favorites);
+  }, [apiCards, favorites, search]);
+
+  const cartTotal = CartService.getTotal(cartItems);
+  const cartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const formatCardCode = (item) => {
-    const number = item.id?.toString().padStart(2, "0") || "00";
-    const total = item.set || "??";
-    return `${number}/${total}`;
+    return item.collectionNumber || item.id;
   };
 
   const renderCard = ({ item, index }) => (
-    <AnimatedCard
-      item={item}
+    <CardSearchResult
+      result={item}
       index={index}
       cardWidth={cardWidth}
       cardHeight={cardHeight}
       formatCardCode={formatCardCode}
-      isFavorite={favorites.some((favorite) => favorite.id === item.id)}
-      onFavoritePress={() => FavoritesService.toggleFavorite(item)}
-      onPress={() => router.push(`/views/CardDetailsView?id=${item.id}`)}
+      isFavorite={FavoritesService.isFavorite(item.card.id)}
+      onFavoritePress={(card) => FavoritesService.toggleFavorite(card)}
+      onPress={(card) => router.push(`/views/CardDetailsView?id=${card.id}`)}
+      onAddToCart={(anuncio) => CartService.addItem(anuncio)}
     />
   );
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#ef5350" />
-        <Text style={{ marginTop: 10 }}>Carregando cartas...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Minha Loja Pokémon</Text>
+      <TopDropDownMenu title="Minha Loja Pokemon" />
+
+      <View style={styles.cartSummary}>
+        <View>
+          <Text style={styles.cartSummaryLabel}>Carrinho</Text>
+          <Text style={styles.cartSummaryText}>
+            {cartQuantity} item(ns) - {formatCurrency(cartTotal)}
+          </Text>
+        </View>
         <TouchableOpacity
-          style={styles.favoritesButton}
-          onPress={() => router.push("/views/FavoritesView")}
           activeOpacity={0.85}
+          onPress={() => setCartVisible(true)}
+          style={styles.cartButton}
         >
-          <Text style={styles.favoritesButtonText}>Favoritos</Text>
+          <Text style={styles.cartButtonText}>Ver carrinho</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
         key={numColumns}
-        data={filteredCards}
+        data={cardResults}
         renderItem={renderCard}
-        keyExtractor={(item) => item.key}
+        keyExtractor={(item) => String(item.card.id)}
         numColumns={numColumns}
-        contentContainerStyle={{ padding: spacing }}
+        contentContainerStyle={[
+          { padding: spacing },
+          cardResults.length === 0 && styles.emptyList,
+        ]}
         columnWrapperStyle={{ justifyContent: "space-between", marginBottom: spacing }}
-        onEndReached={() => setShowLoadMore(true)}
-        onEndReachedThreshold={0.2}
         ListHeaderComponent={
           <View>
             <TextInput
-              placeholder="Buscar Pokémon (ex: pikachu)"
+              placeholder="Buscar qualquer carta ou Pokemon"
               value={search}
               onChangeText={setSearch}
               style={styles.searchInput}
             />
 
-            <BannerCarousel spacing={spacing} />
-
-            <Text style={styles.sectionTitle}>Catálogo</Text>
+            <Text style={styles.sectionTitle}>
+              {search.trim() ? "Cartas encontradas" : "Cartas a venda"}
+            </Text>
+            {searchLoading && (
+              <Text style={styles.searchStatus}>Buscando na API...</Text>
+            )}
+            {!!searchError && (
+              <Text style={styles.searchError}>{searchError}</Text>
+            )}
           </View>
         }
-        ListFooterComponent={
-          showLoadMore && !search.trim() && (
-            <TouchableOpacity style={styles.loadMoreButton} onPress={loadMore}>
-              {loadingMore ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.loadMoreText}>Ver mais</Text>
-              )}
-            </TouchableOpacity>
-          )
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>
+              {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta a venda"}
+            </Text>
+            <Text style={styles.emptyText}>
+              {search.trim()
+                ? "Tente buscar por outro nome de carta ou Pokemon."
+                : "Va em Favoritos, toque em Editar e marque uma carta como item a venda."}
+            </Text>
+            {!search.trim() && (
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => router.push("/views/FavoritesView")}
+                style={styles.emptyButton}
+              >
+                <Text style={styles.emptyButtonText}>Abrir favoritos</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         }
+      />
+
+      <CartModal
+        visible={cartVisible}
+        items={cartItems}
+        total={cartTotal}
+        onClose={() => setCartVisible(false)}
+        onClear={() => CartService.clear()}
+        onUpdateQuantity={(id, quantity) => CartService.updateQuantity(id, quantity)}
       />
     </View>
   );
@@ -188,48 +203,95 @@ export default function HomeView() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#f5f6fa" },
-  header: {
-    padding: 16,
-    backgroundColor: "#fff",
-    elevation: 4,
-    flexDirection: "row",
+  cartSummary: {
     alignItems: "center",
+    backgroundColor: "#fff",
+    borderTopColor: "#eee",
+    borderTopWidth: 1,
+    flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  headerText: { fontSize: 22, fontWeight: "bold", color: "#222" },
-  favoritesButton: {
-    backgroundColor: "#ef5350",
+  cartSummaryLabel: {
+    color: "#666",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  cartSummaryText: {
+    color: "#222",
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  cartButton: {
+    backgroundColor: "#222",
+    borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 10,
   },
-  favoritesButtonText: {
+  cartButtonText: {
     color: "#fff",
     fontWeight: "700",
   },
   searchInput: {
     backgroundColor: "#fff",
+    borderColor: "#ddd",
+    borderRadius: 8,
+    borderWidth: 1,
     marginBottom: 12,
     padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginVertical: 10,
-    marginLeft: 4,
     color: "#333",
+    fontSize: 18,
+    fontWeight: "700",
+    marginLeft: 4,
   },
-  loadMoreButton: {
-    backgroundColor: "#ef5350",
-    padding: 14,
-    borderRadius: 10,
+  searchStatus: {
+    color: "#666",
+    fontSize: 13,
+    marginBottom: 10,
+    marginLeft: 4,
+    marginTop: 4,
+  },
+  searchError: {
+    color: "#d32f2f",
+    fontSize: 13,
+    marginBottom: 10,
+    marginLeft: 4,
+    marginTop: 4,
+  },
+  emptyList: {
+    flexGrow: 1,
+  },
+  emptyState: {
     alignItems: "center",
-    marginVertical: 20,
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
   },
-  loadMoreText: { color: "#fff", fontWeight: "bold" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  emptyTitle: {
+    color: "#222",
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  emptyText: {
+    color: "#666",
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  emptyButton: {
+    backgroundColor: "#ef5350",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  emptyButtonText: {
+    color: "#fff",
+    fontWeight: "800",
+  },
 });

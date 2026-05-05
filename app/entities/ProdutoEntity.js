@@ -26,7 +26,8 @@ export default class ProdutoEntity {
     price,
     favorito,
     descricao,
-    estoque
+    estoque,
+    collectionNumber
   ) {
     const idNorm = normalizeId(id);
     this.id = idNorm ?? newId();
@@ -39,6 +40,7 @@ export default class ProdutoEntity {
     this.favorito = !!favorito;
     this.descricao = descricao ?? '';
     this.estoque = estoque ?? 0;
+    this.collectionNumber = collectionNumber ?? '';
   }
 
   get key() {
@@ -50,6 +52,9 @@ export default class ProdutoEntity {
     const setName = typeof d?.set === 'string' 
       ? d.set 
       : (d?.set?.name ?? d?.colecao ?? '');
+    const cardNumber = d?.number ?? d?.numero;
+    const setTotal = d?.set?.printedTotal ?? d?.set?.total ?? d?.totalColecao;
+    const collectionNumber = cardNumber && setTotal ? `${cardNumber}/${setTotal}` : '';
     
     return new ProdutoEntity(
       d?.id ?? d?._id ?? d?.id?.$oid ?? d?.id?.value,
@@ -60,7 +65,8 @@ export default class ProdutoEntity {
       d?.price ?? d?.preco,
       d?.favorito ?? d?.favorite,
       d?.flavorText ?? d?.descricao ?? d?.description,
-      d?.estoque ?? d?.stock
+      d?.estoque ?? d?.stock,
+      d?.collectionNumber ?? d?.posicaoColecao ?? collectionNumber
     );
   }
 }

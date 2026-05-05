@@ -1,17 +1,19 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  FlatList,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
+    FlatList,
+    Modal,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
 } from "react-native";
 import { AnimatedCard } from "../components/AnimatedCard";
+import { AuthGuard } from "../components/AuthGuard";
+import TopDropDownMenu from "../components/TopDropDownMenu";
 import { FavoritesService } from "../services/FavoritesService";
 
 const saleOptions = [
@@ -50,7 +52,7 @@ function normalizeMoneyValue(value) {
   return text.startsWith("R$") ? text : formatMoneyInput(text);
 }
 
-export default function FavoritesView() {
+function FavoritesViewContent() {
   const { width } = useWindowDimensions();
   const router = useRouter();
   const [favorites, setFavorites] = useState([]);
@@ -70,9 +72,7 @@ export default function FavoritesView() {
   }, []);
 
   const formatCardCode = (item) => {
-    const number = item.id?.toString().padStart(2, "0") || "00";
-    const total = item.set || "??";
-    return `${number}/${total}`;
+    return item.collectionNumber || item.id;
   };
 
   const openEditor = (item) => {
@@ -96,7 +96,7 @@ export default function FavoritesView() {
     if (editingItem && draft) {
       // Validar preço
       const priceText = String(draft.price ?? "").replace(/\D/g, "");
-      if (!priceText || priceText === "0") {
+      if (draft.aVenda && (!priceText || priceText === "0")) {
         alert("Por favor, insira um preço válido");
         return;
       }
@@ -177,16 +177,7 @@ export default function FavoritesView() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Favoritos</Text>
-        <TouchableOpacity
-          style={styles.homeButton}
-          onPress={() => router.push("/")}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.homeButtonText}>Inicio</Text>
-        </TouchableOpacity>
-      </View>
+      <TopDropDownMenu title="Favoritos" />
 
       <FlatList
         key={numColumns}
@@ -274,6 +265,14 @@ export default function FavoritesView() {
         </Pressable>
       </Modal>
     </View>
+  );
+}
+
+export default function FavoritesView() {
+  return (
+    <AuthGuard>
+      <FavoritesViewContent />
+    </AuthGuard>
   );
 }
 
