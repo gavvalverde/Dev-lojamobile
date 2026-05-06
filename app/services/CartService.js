@@ -99,21 +99,25 @@ export const CartService = {
   },
 
   addItem(card) {
-    const existingItem = cartItems.find((item) => item.id === card.id);
+    const cartItemId = card.listingId ?? card.id;
+    const existingItem = cartItems.find((item) => item.id === cartItemId);
 
     if (existingItem) {
-      this.updateQuantity(card.id, existingItem.quantity + 1);
+      this.updateQuantity(cartItemId, existingItem.quantity + 1);
       return;
     }
 
     setCartItems([
       ...cartItems,
       normalizeCartItem({
-        id: card.id,
+        id: cartItemId,
+        cardId: card.id,
         name: card.name,
         images: card.images,
         price: card.price,
         set: card.set,
+        seller: card.seller,
+        sellerId: card.sellerId,
         unitPrice: parsePrice(card.price),
         quantity: 1,
       }),

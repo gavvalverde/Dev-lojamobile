@@ -1,5 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useAppTheme } from "../services/AppThemeContext";
 import { AnimatedCard } from "./AnimatedCard";
+import SellerBadge from "./SellerBadge";
 
 function formatCurrency(value) {
   return (Number(value) || 0).toLocaleString("pt-BR", {
@@ -20,6 +22,8 @@ export function CardSearchResult({
   onAddToCart,
 }) {
   const { card, anuncios } = result;
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
 
   return (
     <View style={[styles.item, { width: cardWidth }]}>
@@ -34,15 +38,16 @@ export function CardSearchResult({
         onPress={() => onPress(card)}
       />
 
-      <View style={styles.offerPanel}>
+      <View style={[styles.offerPanel, { backgroundColor: colors.surface }]}>
         {anuncios.length > 0 ? (
           anuncios.map((anuncio) => (
-            <View key={anuncio.id} style={styles.offer}>
+            <View key={anuncio.listingId} style={styles.offer}>
+              <SellerBadge seller={anuncio.seller} compact />
               <View style={styles.offerInfo}>
-                <Text style={styles.price}>
+                <Text style={[styles.price, { color: colors.primary }]}>
                   {formatCurrency(anuncio.unitPrice)}
                 </Text>
-                <Text numberOfLines={1} style={styles.meta}>
+                <Text numberOfLines={1} style={[styles.meta, { color: colors.mutedText }]}>
                   {anuncio.idioma} - {anuncio.qualidade}
                 </Text>
               </View>
@@ -50,14 +55,14 @@ export function CardSearchResult({
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => onAddToCart(anuncio)}
-                style={styles.buyButton}
+                style={[styles.buyButton, { backgroundColor: colors.primary }]}
               >
                 <Text style={styles.buyButtonText}>Adicionar</Text>
               </TouchableOpacity>
             </View>
           ))
         ) : (
-          <Text style={styles.noOffer}>Sem anuncios ativos</Text>
+          <Text style={[styles.noOffer, { color: colors.mutedText }]}>Sem anuncios ativos</Text>
         )}
       </View>
     </View>
@@ -69,7 +74,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   offerPanel: {
-    backgroundColor: "#fff",
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     marginTop: -6,
@@ -82,18 +86,15 @@ const styles = StyleSheet.create({
     minHeight: 38,
   },
   price: {
-    color: "#ef5350",
     fontSize: 16,
     fontWeight: "800",
   },
   meta: {
-    color: "#666",
     fontSize: 12,
     marginTop: 2,
   },
   buyButton: {
     alignItems: "center",
-    backgroundColor: "#ef5350",
     borderRadius: 8,
     paddingVertical: 10,
   },
@@ -102,7 +103,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   noOffer: {
-    color: "#777",
     fontSize: 13,
     fontWeight: "700",
     minHeight: 42,

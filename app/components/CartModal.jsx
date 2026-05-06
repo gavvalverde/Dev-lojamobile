@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAppTheme } from "../services/AppThemeContext";
+import SellerBadge from "./SellerBadge";
 
 function formatCurrency(value) {
   return (Number(value) || 0).toLocaleString("pt-BR", {
@@ -23,13 +25,17 @@ export function CartModal({
   onClear,
   onUpdateQuantity,
 }) {
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
+
   const renderCartItem = ({ item }) => (
-    <View style={styles.cartItem}>
+    <View style={[styles.cartItem, { borderBottomColor: colors.border }]}>
       <View style={styles.cartItemInfo}>
-        <Text numberOfLines={1} style={styles.cartItemName}>
+        <SellerBadge seller={item.seller} compact />
+        <Text numberOfLines={1} style={[styles.cartItemName, { color: colors.text }]}>
           {item.name}
         </Text>
-        <Text style={styles.cartItemPrice}>
+        <Text style={[styles.cartItemPrice, { color: colors.mutedText }]}>
           {formatCurrency(item.unitPrice)} cada
         </Text>
       </View>
@@ -38,17 +44,17 @@ export function CartModal({
         <TouchableOpacity
           accessibilityLabel="Diminuir quantidade"
           onPress={() => onUpdateQuantity(item.id, item.quantity - 1)}
-          style={styles.quantityButton}
+          style={[styles.quantityButton, { backgroundColor: colors.surfaceVariant }]}
         >
-          <Text style={styles.quantityButtonText}>-</Text>
+          <Text style={[styles.quantityButtonText, { color: colors.text }]}>-</Text>
         </TouchableOpacity>
-        <Text style={styles.quantityText}>{item.quantity}</Text>
+        <Text style={[styles.quantityText, { color: colors.text }]}>{item.quantity}</Text>
         <TouchableOpacity
           accessibilityLabel="Aumentar quantidade"
           onPress={() => onUpdateQuantity(item.id, item.quantity + 1)}
-          style={styles.quantityButton}
+          style={[styles.quantityButton, { backgroundColor: colors.surfaceVariant }]}
         >
-          <Text style={styles.quantityButtonText}>+</Text>
+          <Text style={[styles.quantityButtonText, { color: colors.text }]}>+</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -61,35 +67,39 @@ export function CartModal({
       visible={visible}
       onRequestClose={onClose}
     >
-      <Pressable style={styles.modalOverlay} onPress={onClose}>
-        <Pressable style={styles.cartModal} onPress={(event) => event.stopPropagation()}>
-          <Text style={styles.modalTitle}>Carrinho</Text>
+      <Pressable style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} onPress={onClose}>
+        <Pressable style={[styles.cartModal, { backgroundColor: colors.surface }]} onPress={(event) => event.stopPropagation()}>
+          <Text style={[styles.modalTitle, { color: colors.text }]}>Carrinho</Text>
 
           <FlatList
             data={items}
             renderItem={renderCartItem}
             keyExtractor={(item) => String(item.id)}
             ListEmptyComponent={
-              <Text style={styles.emptyCartText}>
+              <Text style={[styles.emptyCartText, { color: colors.mutedText }]}>
                 Seu carrinho ainda esta vazio.
               </Text>
             }
           />
 
-          <View style={styles.cartFooter}>
-            <Text style={styles.totalText}>Total: {formatCurrency(total)}</Text>
+          <View style={[styles.cartFooter, { borderTopColor: colors.border }]}>
+            <Text style={[styles.totalText, { color: colors.text }]}>Total: {formatCurrency(total)}</Text>
             <View style={styles.cartActions}>
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={onClear}
-                style={[styles.modalButton, styles.clearButton]}
+                style={[
+                  styles.modalButton,
+                  styles.clearButton,
+                  { backgroundColor: colors.surfaceVariant },
+                ]}
               >
-                <Text style={styles.clearButtonText}>Limpar</Text>
+                <Text style={[styles.clearButtonText, { color: colors.text }]}>Limpar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={onClose}
-                style={[styles.modalButton, styles.closeButton]}
+                style={[styles.modalButton, styles.closeButton, { backgroundColor: colors.primary }]}
               >
                 <Text style={styles.closeButtonText}>Fechar</Text>
               </TouchableOpacity>
@@ -104,13 +114,11 @@ export function CartModal({
 const styles = StyleSheet.create({
   modalOverlay: {
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.45)",
     flex: 1,
     justifyContent: "center",
     padding: 16,
   },
   cartModal: {
-    backgroundColor: "#fff",
     borderRadius: 8,
     maxHeight: "80%",
     maxWidth: 520,
@@ -118,14 +126,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   modalTitle: {
-    color: "#222",
     fontSize: 22,
     fontWeight: "800",
     marginBottom: 12,
   },
   cartItem: {
     alignItems: "center",
-    borderBottomColor: "#eee",
     borderBottomWidth: 1,
     flexDirection: "row",
     gap: 12,
@@ -136,12 +142,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cartItemName: {
-    color: "#222",
     fontSize: 15,
     fontWeight: "700",
   },
   cartItemPrice: {
-    color: "#666",
     fontSize: 12,
     marginTop: 2,
   },
@@ -152,37 +156,31 @@ const styles = StyleSheet.create({
   },
   quantityButton: {
     alignItems: "center",
-    backgroundColor: "#eee",
     borderRadius: 6,
     height: 32,
     justifyContent: "center",
     width: 32,
   },
   quantityButtonText: {
-    color: "#222",
     fontSize: 18,
     fontWeight: "800",
   },
   quantityText: {
-    color: "#222",
     fontSize: 15,
     fontWeight: "800",
     minWidth: 20,
     textAlign: "center",
   },
   emptyCartText: {
-    color: "#666",
     paddingVertical: 20,
     textAlign: "center",
   },
   cartFooter: {
-    borderTopColor: "#eee",
     borderTopWidth: 1,
     marginTop: 12,
     paddingTop: 12,
   },
   totalText: {
-    color: "#222",
     fontSize: 18,
     fontWeight: "800",
     marginBottom: 12,
@@ -199,14 +197,11 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   clearButton: {
-    backgroundColor: "#eee",
   },
   clearButtonText: {
-    color: "#333",
     fontWeight: "800",
   },
   closeButton: {
-    backgroundColor: "#ef5350",
   },
   closeButtonText: {
     color: "#fff",

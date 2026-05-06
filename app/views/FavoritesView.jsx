@@ -15,6 +15,7 @@ import { AnimatedCard } from "../components/AnimatedCard";
 import { AuthGuard } from "../components/AuthGuard";
 import TopDropDownMenu from "../components/TopDropDownMenu";
 import { FavoritesService } from "../services/FavoritesService";
+import { useAppTheme } from "../services/AppThemeContext";
 
 const saleOptions = [
   { label: "Sim", value: true },
@@ -55,6 +56,8 @@ function normalizeMoneyValue(value) {
 function FavoritesViewContent() {
   const { width } = useWindowDimensions();
   const router = useRouter();
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
   const [favorites, setFavorites] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
   const [draft, setDraft] = useState(null);
@@ -117,29 +120,32 @@ function FavoritesViewContent() {
 
     return (
       <View style={styles.field}>
-        <Text style={styles.inputLabel}>{label}</Text>
+        <Text style={[styles.inputLabel, { color: colors.mutedText }]}>{label}</Text>
         <TouchableOpacity
-          style={styles.selectButton}
+          style={[styles.selectButton, { borderColor: colors.border }]}
           activeOpacity={0.85}
           onPress={() => setOpenDropdown(isOpen ? null : field)}
         >
-          <Text style={styles.selectButtonText}>{selectedLabel}</Text>
-          <Text style={styles.selectArrow}>{isOpen ? "^" : "v"}</Text>
+          <Text style={[styles.selectButtonText, { color: colors.text }]}>{selectedLabel}</Text>
+          <Text style={[styles.selectArrow, { color: colors.mutedText }]}>{isOpen ? "^" : "v"}</Text>
         </TouchableOpacity>
 
         {isOpen && (
-          <View style={styles.dropdownList}>
+          <View style={[styles.dropdownList, { borderColor: colors.border }]}>
             {normalizedOptions.map((option) => (
               <TouchableOpacity
                 key={option.label}
-                style={styles.dropdownOption}
+                style={[
+                  styles.dropdownOption,
+                  { backgroundColor: colors.surface, borderBottomColor: colors.border },
+                ]}
                 activeOpacity={0.8}
                 onPress={() => {
                   setDraft((current) => ({ ...current, [field]: option.value }));
                   setOpenDropdown(null);
                 }}
               >
-                <Text style={styles.dropdownOptionText}>{option.label}</Text>
+                <Text style={[styles.dropdownOptionText, { color: colors.text }]}>{option.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -162,7 +168,7 @@ function FavoritesViewContent() {
       />
 
       <TouchableOpacity
-        style={styles.editButton}
+        style={[styles.editButton, { backgroundColor: colors.secondary }]}
         activeOpacity={0.85}
         onPress={() => openEditor(item)}
       >
@@ -176,7 +182,7 @@ function FavoritesViewContent() {
   const qualidadeDropdown = draft ? renderDropdown("qualidade", "Qualidade", draft.qualidade, qualityOptions) : null;
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <TopDropDownMenu title="Favoritos" />
 
       <FlatList
@@ -192,12 +198,12 @@ function FavoritesViewContent() {
         columnWrapperStyle={{ justifyContent: "space-between", marginBottom: spacing }}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>Nenhuma carta favorita</Text>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhuma carta favorita</Text>
+            <Text style={[styles.emptyText, { color: colors.mutedText }]}>
               Toque em Fav nas cartas do catalogo para montar sua lista.
             </Text>
             <TouchableOpacity
-              style={styles.catalogButton}
+              style={[styles.catalogButton, { backgroundColor: colors.primary }]}
               onPress={() => router.push("/")}
               activeOpacity={0.85}
             >
@@ -215,18 +221,18 @@ function FavoritesViewContent() {
       >
         <Pressable style={styles.modalOverlay} onPress={closeEditor}>
           <Pressable
-            style={styles.modalCard}
+            style={[styles.modalCard, { backgroundColor: colors.surface }]}
             onPress={(event) => event.stopPropagation()}
           >
-            <Text style={styles.modalTitle}>Editar carta</Text>
-            <Text numberOfLines={1} style={styles.modalSubtitle}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Editar carta</Text>
+            <Text numberOfLines={1} style={[styles.modalSubtitle, { color: colors.mutedText }]}>
               {editingItem?.name}
             </Text>
 
             {aVendaDropdown}
 
             <View style={styles.field}>
-              <Text style={styles.inputLabel}>Preco</Text>
+              <Text style={[styles.inputLabel, { color: colors.mutedText }]}>Preco</Text>
               <TextInput
                 value={String(draft?.price ?? "")}
                 onChangeText={(price) =>
@@ -237,7 +243,15 @@ function FavoritesViewContent() {
                 }
                 keyboardType="numeric"
                 placeholder="R$ 0,00"
-                style={styles.input}
+                placeholderTextColor={colors.mutedText}
+                style={[
+                  styles.input,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
               />
             </View>
 
@@ -247,14 +261,17 @@ function FavoritesViewContent() {
 
             <View style={styles.modalActions}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: colors.surfaceVariant },
+                ]}
                 activeOpacity={0.85}
                 onPress={closeEditor}
               >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.text }]}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
+                style={[styles.modalButton, styles.saveButton, { backgroundColor: colors.primary }]}
                 activeOpacity={0.85}
                 onPress={saveEditor}
               >
@@ -289,7 +306,6 @@ const styles = StyleSheet.create({
   },
   headerText: { fontSize: 22, fontWeight: "bold", color: "#222" },
   homeButton: {
-    backgroundColor: "#ef5350",
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 10,
@@ -309,18 +325,15 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#222",
     marginBottom: 8,
     textAlign: "center",
   },
   emptyText: {
     fontSize: 14,
-    color: "#666",
     textAlign: "center",
     marginBottom: 16,
   },
   catalogButton: {
-    backgroundColor: "#ef5350",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 10,
@@ -334,7 +347,6 @@ const styles = StyleSheet.create({
   },
   editButton: {
     alignItems: "center",
-    backgroundColor: "#222",
     borderRadius: 8,
     marginTop: 8,
     paddingVertical: 10,
@@ -351,19 +363,16 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   modalCard: {
-    backgroundColor: "#fff",
     borderRadius: 8,
     maxWidth: 420,
     padding: 16,
     width: "100%",
   },
   modalTitle: {
-    color: "#222",
     fontSize: 20,
     fontWeight: "700",
   },
   modalSubtitle: {
-    color: "#666",
     fontSize: 14,
     marginBottom: 14,
     marginTop: 4,
@@ -372,22 +381,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   inputLabel: {
-    color: "#555",
     fontSize: 12,
     fontWeight: "700",
     marginBottom: 4,
   },
   input: {
-    borderColor: "#ddd",
     borderRadius: 8,
     borderWidth: 1,
-    color: "#222",
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
   selectButton: {
     alignItems: "center",
-    borderColor: "#ddd",
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -396,31 +401,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   selectButtonText: {
-    color: "#222",
     fontSize: 14,
     fontWeight: "600",
   },
   selectArrow: {
-    color: "#777",
     fontSize: 12,
     marginLeft: 8,
   },
   dropdownList: {
-    borderColor: "#ddd",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 6,
     overflow: "hidden",
   },
   dropdownOption: {
-    backgroundColor: "#fff",
-    borderBottomColor: "#eee",
     borderBottomWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
   dropdownOptionText: {
-    color: "#222",
     fontSize: 14,
   },
   modalActions: {
@@ -434,15 +433,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 11,
   },
-  cancelButton: {
-    backgroundColor: "#eee",
-  },
   cancelButtonText: {
-    color: "#333",
     fontWeight: "700",
   },
   saveButton: {
-    backgroundColor: "#ef5350",
   },
   saveButtonText: {
     color: "#fff",

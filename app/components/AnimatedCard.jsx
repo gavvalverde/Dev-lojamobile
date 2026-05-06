@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
     Animated,
     Image,
@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useAppTheme } from "../services/AppThemeContext";
 
 export function AnimatedCard({
   item,
@@ -18,8 +19,10 @@ export function AnimatedCard({
   isFavorite = false,
   formatCardCode,
 }) {
-  const opacity = useState(new Animated.Value(0))[0];
-  const translateY = useState(new Animated.Value(20))[0];
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -36,7 +39,7 @@ export function AnimatedCard({
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [index, opacity, translateY]);
 
   return (
     <Animated.View
@@ -46,7 +49,7 @@ export function AnimatedCard({
       }}
     >
       <TouchableOpacity
-        style={[styles.card, { width: cardWidth }]}
+        style={[styles.card, { width: cardWidth, backgroundColor: colors.surface }]}
         activeOpacity={0.9}
         onPress={onPress}
       >
@@ -58,7 +61,8 @@ export function AnimatedCard({
         <TouchableOpacity
           style={[
             styles.favoriteButton,
-            isFavorite && styles.favoriteButtonActive,
+            { backgroundColor: colors.surface },
+            isFavorite && { backgroundColor: colors.primary },
           ]}
           activeOpacity={0.85}
           onPress={(event) => {
@@ -69,6 +73,7 @@ export function AnimatedCard({
           <Text
             style={[
               styles.favoriteText,
+              { color: colors.primary },
               isFavorite && styles.favoriteTextActive,
             ]}
           >
@@ -77,10 +82,10 @@ export function AnimatedCard({
         </TouchableOpacity>
 
         <View style={styles.cardInfo}>
-          <Text numberOfLines={1} style={styles.cardName}>
+          <Text numberOfLines={1} style={[styles.cardName, { color: colors.text }]}>
             {item.name}
           </Text>
-          <Text style={styles.cardCode}>
+          <Text style={[styles.cardCode, { color: colors.mutedText }]}>
             {formatCardCode(item)}
           </Text>
         </View>
@@ -94,7 +99,6 @@ const styles = StyleSheet.create({
     position: "relative",
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#fff",
     elevation: 3,
   },
   image: { width: "100%" },
@@ -106,21 +110,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: "rgba(255, 255, 255, 0.92)",
     alignItems: "center",
-  },
-  favoriteButtonActive: {
-    backgroundColor: "#ef5350",
   },
   favoriteText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#ef5350",
   },
   favoriteTextActive: {
     color: "#fff",
   },
   cardInfo: { padding: 8 },
-  cardName: { fontSize: 13, fontWeight: "600", color: "#333" },
-  cardCode: { fontSize: 11, color: "#777", marginTop: 2 },
+  cardName: { fontSize: 13, fontWeight: "600" },
+  cardCode: { fontSize: 11, marginTop: 2 },
 });

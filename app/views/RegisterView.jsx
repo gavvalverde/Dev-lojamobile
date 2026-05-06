@@ -3,8 +3,10 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AuthForm } from "../components/AuthForm";
 import { AuthService } from "../services/AuthService";
+import { useAppTheme } from "../services/AppThemeContext";
 
 export default function RegisterView() {
+  const { theme } = useAppTheme();
   const [values, setValues] = useState({
     name: "",
     email: "",
@@ -32,7 +34,7 @@ export default function RegisterView() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.colors.background }]}>
       <AuthForm
         title="Criar conta"
         submitLabel="Cadastrar"

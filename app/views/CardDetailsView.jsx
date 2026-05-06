@@ -10,11 +10,13 @@ import {
     View,
 } from "react-native";
 import { AuthGuard } from "../components/AuthGuard";
+import SellerBadge from "../components/SellerBadge";
 import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AnuncioService } from "../services/AnuncioService";
 import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
 import { PokemonService } from "../services/PokemonService";
+import { useAppTheme } from "../services/AppThemeContext";
 
 function formatCurrency(value) {
   return (Number(value) || 0).toLocaleString("pt-BR", {
@@ -36,6 +38,8 @@ function parsePrice(value) {
 
 function CardDetailsViewContent() {
   const { id } = useLocalSearchParams();
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
   const cardId = Array.isArray(id) ? id[0] : id;
   const [produto, setProduto] = useState(null);
   const [favorites, setFavorites] = useState([]);
@@ -85,25 +89,25 @@ function CardDetailsViewContent() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#ef5350" />
-        <Text>Carregando detalhes...</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ color: colors.text }}>Carregando detalhes...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
       </View>
     );
   }
 
   if (!produto) {
     return (
-      <View style={styles.center}>
-        <Text>Produto nao encontrado ou ID invalido.</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.text }}>Produto nao encontrado ou ID invalido.</Text>
       </View>
     );
   }
@@ -111,11 +115,11 @@ function CardDetailsViewContent() {
   return (
     <>
       <TopDropDownMenu title={produto.name ? `Detalhes - ${produto.name}` : "Detalhes da carta"} />
-      <ScrollView style={styles.container}>
+      <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.imageContainer}>
           {imageLoading && (
             <View style={styles.imageLoader}>
-              <ActivityIndicator size="small" color="#ef5350" />
+              <ActivityIndicator size="small" color={colors.primary} />
             </View>
           )}
           <Image
@@ -127,22 +131,23 @@ function CardDetailsViewContent() {
         </View>
 
         <View style={styles.details}>
-          <Text style={styles.name}>{produto.name}</Text>
-          <Text style={styles.collectionNumber}>
+          <Text style={[styles.name, { color: colors.text }]}>{produto.name}</Text>
+          <Text style={[styles.collectionNumber, { color: colors.primary }]}>
             {produto.collectionNumber || "Posicao na colecao indisponivel"}
           </Text>
-          <Text style={styles.set}>{produto.set || "Sem colecao"}</Text>
-          <Text style={styles.rarity}>{produto.rarity || "Sem raridade"}</Text>
+          <Text style={[styles.set, { color: colors.mutedText }]}>{produto.set || "Sem colecao"}</Text>
+          <Text style={[styles.rarity, { color: colors.mutedText }]}>{produto.rarity || "Sem raridade"}</Text>
 
-          <Text style={styles.pricesTitle}>Anuncios desta carta</Text>
+          <Text style={[styles.pricesTitle, { color: colors.text }]}>Anuncios desta carta</Text>
           {saleListings.length > 0 ? (
             saleListings.map((listing) => (
-              <View key={listing.id} style={styles.listingCard}>
+              <View key={listing.listingId} style={[styles.listingCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.listingInfo}>
-                  <Text style={styles.listingPrice}>
+                  <SellerBadge seller={listing.seller} />
+                  <Text style={[styles.listingPrice, { color: colors.primary }]}>
                     {formatCurrency(parsePrice(listing.price))}
                   </Text>
-                  <Text style={styles.listingMeta}>
+                  <Text style={[styles.listingMeta, { color: colors.mutedText }]}>
                     {listing.idioma} - {listing.qualidade}
                   </Text>
                 </View>
@@ -150,15 +155,15 @@ function CardDetailsViewContent() {
                 <TouchableOpacity
                   activeOpacity={0.85}
                   onPress={() => CartService.addItem(listing)}
-                  style={styles.buyButton}
+                  style={[styles.buyButton, { backgroundColor: colors.primary }]}
                 >
                   <Text style={styles.buyButtonText}>Adicionar</Text>
                 </TouchableOpacity>
               </View>
             ))
           ) : (
-            <View style={styles.emptyListing}>
-              <Text style={styles.emptyListingText}>
+            <View style={[styles.emptyListing, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.emptyListingText, { color: colors.mutedText }]}>
                 Nenhum anuncio ativo para esta carta.
               </Text>
             </View>
@@ -180,7 +185,6 @@ export default function CardDetailsView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f6fa",
   },
   center: {
     flex: 1,
@@ -204,7 +208,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f6fa",
   },
   details: {
     padding: 16,
@@ -212,35 +215,29 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#222",
     marginBottom: 8,
   },
   set: {
     fontSize: 16,
-    color: "#555",
     marginBottom: 4,
   },
   collectionNumber: {
-    color: "#ef5350",
     fontSize: 18,
     fontWeight: "800",
     marginBottom: 8,
   },
   rarity: {
     fontSize: 16,
-    color: "#777",
     marginBottom: 4,
   },
   pricesTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#333",
     marginBottom: 10,
     marginTop: 8,
   },
   listingCard: {
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 8,
     flexDirection: "row",
     gap: 12,
@@ -252,17 +249,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listingPrice: {
-    color: "#ef5350",
     fontSize: 20,
     fontWeight: "800",
   },
   listingMeta: {
-    color: "#666",
     fontSize: 13,
     marginTop: 3,
   },
   buyButton: {
-    backgroundColor: "#ef5350",
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 11,
@@ -272,17 +266,14 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   emptyListing: {
-    backgroundColor: "#fff",
     borderRadius: 8,
     padding: 14,
   },
   emptyListingText: {
-    color: "#666",
     textAlign: "center",
   },
   errorText: {
     fontSize: 16,
-    color: "#d32f2f",
     textAlign: "center",
   },
 });

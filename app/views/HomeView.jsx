@@ -16,6 +16,7 @@ import { AnuncioService } from "../services/AnuncioService";
 import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
 import { PokemonService } from "../services/PokemonService";
+import { useAppTheme } from "../services/AppThemeContext";
 
 function formatCurrency(value) {
   return (Number(value) || 0).toLocaleString("pt-BR", {
@@ -27,6 +28,8 @@ function formatCurrency(value) {
 export default function HomeView() {
   const { width } = useWindowDimensions();
   const router = useRouter();
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
 
   const numColumns = Math.max(2, width > 900 ? 4 : width > 600 ? 3 : 2);
   const spacing = 12;
@@ -116,20 +119,25 @@ export default function HomeView() {
   );
 
   return (
-    <View style={styles.screen}>
-      <TopDropDownMenu title="Minha Loja Pokemon" />
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <TopDropDownMenu title="Yellow Duck TCG" />
 
-      <View style={styles.cartSummary}>
+      <View
+        style={[
+          styles.cartSummary,
+          { backgroundColor: colors.surface, borderTopColor: colors.border },
+        ]}
+      >
         <View>
-          <Text style={styles.cartSummaryLabel}>Carrinho</Text>
-          <Text style={styles.cartSummaryText}>
+          <Text style={[styles.cartSummaryLabel, { color: colors.mutedText }]}>Carrinho</Text>
+          <Text style={[styles.cartSummaryText, { color: colors.text }]}>
             {cartQuantity} item(ns) - {formatCurrency(cartTotal)}
           </Text>
         </View>
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => setCartVisible(true)}
-          style={styles.cartButton}
+          style={[styles.cartButton, { backgroundColor: colors.secondary }]}
         >
           <Text style={styles.cartButtonText}>Ver carrinho</Text>
         </TouchableOpacity>
@@ -149,38 +157,46 @@ export default function HomeView() {
         ListHeaderComponent={
           <View>
             <TextInput
-              placeholder="Buscar qualquer carta ou Pokemon"
+              placeholder="Buscar cartas Pokemon TCG"
               value={search}
               onChangeText={setSearch}
-              style={styles.searchInput}
+              placeholderTextColor={colors.mutedText}
+              style={[
+                styles.searchInput,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                  color: colors.text,
+                },
+              ]}
             />
 
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {search.trim() ? "Cartas encontradas" : "Cartas a venda"}
             </Text>
             {searchLoading && (
-              <Text style={styles.searchStatus}>Buscando na API...</Text>
+              <Text style={[styles.searchStatus, { color: colors.mutedText }]}>Buscando na API...</Text>
             )}
             {!!searchError && (
-              <Text style={styles.searchError}>{searchError}</Text>
+              <Text style={[styles.searchError, { color: colors.danger }]}>{searchError}</Text>
             )}
           </View>
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
               {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta a venda"}
             </Text>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyText, { color: colors.mutedText }]}>
               {search.trim()
-                ? "Tente buscar por outro nome de carta ou Pokemon."
+                ? "Tente buscar por outro nome de carta Pokemon TCG."
                 : "Va em Favoritos, toque em Editar e marque uma carta como item a venda."}
             </Text>
             {!search.trim() && (
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => router.push("/views/FavoritesView")}
-                style={styles.emptyButton}
+                style={[styles.emptyButton, { backgroundColor: colors.primary }]}
               >
                 <Text style={styles.emptyButtonText}>Abrir favoritos</Text>
               </TouchableOpacity>
@@ -205,8 +221,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#f5f6fa" },
   cartSummary: {
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderTopColor: "#eee",
     borderTopWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -214,18 +228,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   cartSummaryLabel: {
-    color: "#666",
     fontSize: 12,
     fontWeight: "700",
   },
   cartSummaryText: {
-    color: "#222",
     fontSize: 16,
     fontWeight: "700",
     marginTop: 2,
   },
   cartButton: {
-    backgroundColor: "#222",
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -235,28 +246,23 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   searchInput: {
-    backgroundColor: "#fff",
-    borderColor: "#ddd",
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 12,
     padding: 12,
   },
   sectionTitle: {
-    color: "#333",
     fontSize: 18,
     fontWeight: "700",
     marginLeft: 4,
   },
   searchStatus: {
-    color: "#666",
     fontSize: 13,
     marginBottom: 10,
     marginLeft: 4,
     marginTop: 4,
   },
   searchError: {
-    color: "#d32f2f",
     fontSize: 13,
     marginBottom: 10,
     marginLeft: 4,
@@ -272,20 +278,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   emptyTitle: {
-    color: "#222",
     fontSize: 20,
     fontWeight: "800",
     marginBottom: 8,
     textAlign: "center",
   },
   emptyText: {
-    color: "#666",
     fontSize: 14,
     marginBottom: 16,
     textAlign: "center",
   },
   emptyButton: {
-    backgroundColor: "#ef5350",
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,

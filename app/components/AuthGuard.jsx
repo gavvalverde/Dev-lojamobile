@@ -2,9 +2,12 @@ import { router, useSegments } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { AuthService } from "../services/AuthService";
+import { useAppTheme } from "../services/AppThemeContext";
 
 export function AuthGuard({ children }) {
   const segments = useSegments();
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
   const [user, setUser] = useState(AuthService.getCurrentUser());
   const [loading, setLoading] = useState(true);
   const isAuthRoute =
@@ -49,9 +52,9 @@ export function AuthGuard({ children }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#ef5350" />
-        <Text style={styles.loadingText}>Carregando sessao...</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.mutedText }]}>Carregando sessao...</Text>
       </View>
     );
   }
@@ -64,12 +67,10 @@ export function AuthGuard({ children }) {
 const styles = StyleSheet.create({
   center: {
     alignItems: "center",
-    backgroundColor: "#f5f6fa",
     flex: 1,
     justifyContent: "center",
   },
   loadingText: {
-    color: "#666",
     marginTop: 10,
   },
 });

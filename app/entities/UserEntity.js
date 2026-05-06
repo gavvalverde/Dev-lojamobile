@@ -17,7 +17,7 @@ export default class UserEntity {
     location = "",
     favoritePokemon = "",
     pronouns = "",
-    themeColor = "#ef5350",
+    themeColor = "#ffc94a",
     badges = []
   ) {
     this.id = id ?? newId();
@@ -33,7 +33,7 @@ export default class UserEntity {
     this.location = location ?? "";
     this.favoritePokemon = favoritePokemon ?? "";
     this.pronouns = pronouns ?? "";
-    this.themeColor = themeColor || "#ef5350";
+    this.themeColor = themeColor || "#ffc94a";
     this.badges = Array.isArray(badges) ? badges : [];
   }
 

@@ -3,8 +3,10 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AuthForm } from "../components/AuthForm";
 import { AuthService } from "../services/AuthService";
+import { useAppTheme } from "../services/AppThemeContext";
 
 export default function LoginView() {
+  const { theme } = useAppTheme();
   const [values, setValues] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ export default function LoginView() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.colors.background }]}>
       <AuthForm
         title="Entrar"
         submitLabel="Entrar"

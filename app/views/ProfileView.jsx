@@ -16,6 +16,7 @@ import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AuthService } from "../services/AuthService";
 import { FavoritesService } from "../services/FavoritesService";
 import { UserService } from "../services/UserService";
+import { useAppTheme } from "../services/AppThemeContext";
 
 function getInitials(name) {
   return String(name ?? "")
@@ -33,6 +34,8 @@ function getPublicHandle(user) {
 }
 
 export default function ProfileView() {
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
   const [user, setUser] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -62,6 +65,7 @@ export default function ProfileView() {
       setLoading(true);
       const updatedUser = await UserService.updateProfile(user.id, updates);
       AuthService.setCurrentUser(updatedUser);
+      FavoritesService.updateSellerProfile(updatedUser);
       setUser(updatedUser);
       setEditModalVisible(false);
       Alert.alert("Perfil salvo", "Suas alteracoes ja aparecem no perfil.");
@@ -98,21 +102,21 @@ export default function ProfileView() {
 
   if (!user) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ef5350" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
-  const themeColor = user.themeColor || "#ef5350";
+  const themeColor = user.themeColor || "#ffc94a";
   const badges = user.badges?.length ? user.badges : ["Novo perfil"];
 
   return (
     <>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <TopDropDownMenu title="Perfil" />
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.profileCard}>
+          <View style={[styles.profileCard, { backgroundColor: colors.surface }]}>
             <View style={[styles.cover, { backgroundColor: themeColor }]}>
               {user.coverPhoto && (
                 <Image source={{ uri: user.coverPhoto }} style={styles.coverImage} />
@@ -137,34 +141,40 @@ export default function ProfileView() {
                 )}
               </View>
 
-              <Text style={styles.userName}>{user.name}</Text>
-              <Text style={styles.userHandle}>{getPublicHandle(user)}</Text>
+              <Text style={[styles.userName, { color: colors.text }]}>{user.name}</Text>
+              <Text style={[styles.userHandle, { color: colors.mutedText }]}>{getPublicHandle(user)}</Text>
 
               <View style={styles.metaLine}>
                 {!!user.pronouns && (
-                  <Text style={styles.metaText}>{user.pronouns}</Text>
+                  <Text style={[styles.metaText, { color: colors.mutedText }]}>{user.pronouns}</Text>
                 )}
                 {!!user.location && (
-                  <Text style={styles.metaText}>{user.location}</Text>
+                  <Text style={[styles.metaText, { color: colors.mutedText }]}>{user.location}</Text>
                 )}
               </View>
 
               <View style={[styles.statusPill, { borderColor: themeColor }]}>
                 <View style={[styles.statusDot, { backgroundColor: themeColor }]} />
-                <Text style={styles.statusText}>
+                <Text style={[styles.statusText, { color: colors.text }]}>
                   {user.status || "Montando minha colecao"}
                 </Text>
               </View>
 
-              <Text style={[styles.bio, !user.bio && styles.emptyBio]}>
+              <Text style={[styles.bio, { color: colors.text }, !user.bio && styles.emptyBio]}>
                 {user.bio ||
                   "Escreva uma bio, escolha uma capa e deixe esse perfil com a sua cara."}
               </Text>
 
               <View style={styles.badges}>
                 {badges.map((badge) => (
-                  <View key={badge} style={[styles.badge, { borderColor: themeColor }]}>
-                    <Text style={styles.badgeText}>{badge}</Text>
+                  <View
+                    key={badge}
+                    style={[
+                      styles.badge,
+                      { backgroundColor: colors.surface, borderColor: themeColor },
+                    ]}
+                  >
+                    <Text style={[styles.badgeText, { color: colors.text }]}>{badge}</Text>
                   </View>
                 ))}
               </View>
@@ -173,37 +183,37 @@ export default function ProfileView() {
 
           <View style={styles.statsRow}>
             {profileStats.map((stat) => (
-              <View key={stat.label} style={styles.statCard}>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
+              <View key={stat.label} style={[styles.statCard, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
+                <Text style={[styles.statLabel, { color: colors.mutedText }]}>{stat.label}</Text>
               </View>
             ))}
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Vitrine</Text>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Vitrine</Text>
             <View style={styles.showcaseRow}>
               <View style={[styles.showcaseIcon, { backgroundColor: themeColor }]}>
                 <MaterialCommunityIcons name="cards" size={24} color="#fff" />
               </View>
               <View style={styles.showcaseTextBlock}>
-                <Text style={styles.showcaseLabel}>Carta ou Pokemon favorito</Text>
-                <Text style={[styles.showcaseValue, !user.favoritePokemon && styles.emptyText]}>
+                <Text style={[styles.showcaseLabel, { color: colors.mutedText }]}>Carta ou Pokemon favorito</Text>
+                <Text style={[styles.showcaseValue, { color: colors.text }, !user.favoritePokemon && styles.emptyText]}>
                   {user.favoritePokemon || "Ainda nao escolhido"}
                 </Text>
               </View>
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Contato e conta</Text>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Contato e conta</Text>
             <View style={styles.infoRow}>
-              <MaterialCommunityIcons name="email-outline" size={20} color="#666" />
-              <Text style={styles.infoText}>{user.email}</Text>
+              <MaterialCommunityIcons name="email-outline" size={20} color={colors.mutedText} />
+              <Text style={[styles.infoText, { color: colors.text }]}>{user.email}</Text>
             </View>
             <View style={styles.infoRow}>
-              <MaterialCommunityIcons name="phone-outline" size={20} color="#666" />
-              <Text style={[styles.infoText, !user.phone && styles.emptyText]}>
+              <MaterialCommunityIcons name="phone-outline" size={20} color={colors.mutedText} />
+              <Text style={[styles.infoText, { color: colors.text }, !user.phone && styles.emptyText]}>
                 {user.phone || "Telefone nao informado"}
               </Text>
             </View>
@@ -222,18 +232,18 @@ export default function ProfileView() {
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={showProfileCard}
-              style={styles.secondaryAction}
+              style={[styles.secondaryAction, { backgroundColor: colors.surface }]}
             >
-              <MaterialCommunityIcons name="card-account-details-outline" size={20} color="#222" />
-              <Text style={styles.secondaryActionText}>Ver cartao</Text>
+              <MaterialCommunityIcons name="card-account-details-outline" size={20} color={colors.text} />
+              <Text style={[styles.secondaryActionText, { color: colors.text }]}>Ver cartao</Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.85}
               disabled={loading}
               onPress={handleLogout}
-              style={styles.logoutAction}
+              style={[styles.logoutAction, { backgroundColor: colors.surface }]}
             >
-              <MaterialCommunityIcons name="logout" size={20} color="#d32f2f" />
+              <MaterialCommunityIcons name="logout" size={20} color={colors.danger} />
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -258,7 +268,6 @@ export default function ProfileView() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f5f6fa",
     flex: 1,
   },
   scrollContent: {
@@ -267,12 +276,10 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     alignItems: "center",
-    backgroundColor: "#f5f6fa",
     flex: 1,
     justifyContent: "center",
   },
   profileCard: {
-    backgroundColor: "#fff",
     borderRadius: 8,
     marginBottom: 12,
     overflow: "hidden",
@@ -334,14 +341,12 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   userName: {
-    color: "#222",
     fontSize: 25,
     fontWeight: "900",
     marginTop: 10,
     textAlign: "center",
   },
   userHandle: {
-    color: "#666",
     fontSize: 14,
     fontWeight: "800",
     marginTop: 2,
@@ -354,7 +359,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   metaText: {
-    color: "#555",
     fontSize: 13,
     fontWeight: "700",
   },
@@ -374,12 +378,10 @@ const styles = StyleSheet.create({
     width: 8,
   },
   statusText: {
-    color: "#333",
     fontSize: 13,
     fontWeight: "800",
   },
   bio: {
-    color: "#333",
     fontSize: 15,
     lineHeight: 22,
     marginTop: 14,
@@ -398,14 +400,12 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   badge: {
-    backgroundColor: "#fff",
     borderRadius: 999,
     borderWidth: 1,
     paddingHorizontal: 11,
     paddingVertical: 7,
   },
   badgeText: {
-    color: "#333",
     fontSize: 12,
     fontWeight: "900",
   },
@@ -416,30 +416,25 @@ const styles = StyleSheet.create({
   },
   statCard: {
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 8,
     flex: 1,
     paddingVertical: 14,
   },
   statValue: {
-    color: "#222",
     fontSize: 22,
     fontWeight: "900",
   },
   statLabel: {
-    color: "#666",
     fontSize: 12,
     fontWeight: "800",
     marginTop: 2,
   },
   section: {
-    backgroundColor: "#fff",
     borderRadius: 8,
     marginBottom: 12,
     padding: 14,
   },
   sectionTitle: {
-    color: "#555",
     fontSize: 12,
     fontWeight: "900",
     letterSpacing: 0,
@@ -462,12 +457,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   showcaseLabel: {
-    color: "#666",
     fontSize: 12,
     fontWeight: "800",
   },
   showcaseValue: {
-    color: "#222",
     fontSize: 17,
     fontWeight: "900",
     marginTop: 2,
@@ -479,7 +472,6 @@ const styles = StyleSheet.create({
     minHeight: 34,
   },
   infoText: {
-    color: "#333",
     flex: 1,
     fontSize: 15,
     fontWeight: "700",
@@ -507,7 +499,6 @@ const styles = StyleSheet.create({
   },
   secondaryAction: {
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 8,
     flex: 1,
     flexDirection: "row",
@@ -516,12 +507,10 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   secondaryActionText: {
-    color: "#222",
     fontWeight: "900",
   },
   logoutAction: {
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 8,
     justifyContent: "center",
     minHeight: 48,

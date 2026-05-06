@@ -9,15 +9,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAppTheme } from "../services/AppThemeContext";
 import { AuthService } from "../services/AuthService";
 
 const menuItems = [
-  { label: "Catalogo", path: "/views/HomeView" },
+  { label: "Catalogo TCG", path: "/views/HomeView" },
   { label: "Favoritos", path: "/views/FavoritesView" },
 ];
 
-export default function TopDropDownMenu({ title = "Minha Loja Pokemon" }) {
+export default function TopDropDownMenu({ title = "Yellow Duck TCG" }) {
   const [visible, setVisible] = useState(false);
+  const { isDarkMode, theme, toggleTheme } = useAppTheme();
+  const colors = theme.colors;
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -34,7 +37,7 @@ export default function TopDropDownMenu({ title = "Minha Loja Pokemon" }) {
   };
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: colors.secondary }]}>
       <TouchableOpacity
         accessibilityLabel="Abrir menu"
         accessibilityRole="button"
@@ -42,12 +45,26 @@ export default function TopDropDownMenu({ title = "Minha Loja Pokemon" }) {
         onPress={openMenu}
         style={styles.menuButton}
       >
-        <MaterialIcons name="menu" size={28} color="#222" />
+        <MaterialIcons name="menu" size={28} color={colors.accent} />
       </TouchableOpacity>
 
-      <Text numberOfLines={1} style={styles.title}>
+      <Text numberOfLines={1} style={[styles.title, { color: colors.onPrimary }]}>
         {title}
       </Text>
+
+      <TouchableOpacity
+        accessibilityLabel={isDarkMode ? "Ativar modo claro" : "Ativar modo escuro"}
+        accessibilityRole="button"
+        activeOpacity={0.75}
+        onPress={toggleTheme}
+        style={styles.themeButton}
+      >
+        <MaterialIcons
+          name={isDarkMode ? "light-mode" : "dark-mode"}
+          size={24}
+          color={colors.accent}
+        />
+      </TouchableOpacity>
 
       <Modal
         animationType="fade"
@@ -56,7 +73,7 @@ export default function TopDropDownMenu({ title = "Minha Loja Pokemon" }) {
         visible={visible}
       >
         <Pressable style={styles.backdrop} onPress={closeMenu}>
-          <View style={styles.menu}>
+          <View style={[styles.menu, { backgroundColor: colors.surface }]}>
             {menuItems.map((item) => (
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -64,15 +81,15 @@ export default function TopDropDownMenu({ title = "Minha Loja Pokemon" }) {
                 onPress={() => navigate(item.path)}
                 style={styles.menuItem}
               >
-                <Text style={styles.menuText}>{item.label}</Text>
+                <Text style={[styles.menuText, { color: colors.text }]}>{item.label}</Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={logout}
-              style={[styles.menuItem, styles.logoutItem]}
+              style={[styles.menuItem, styles.logoutItem, { borderTopColor: colors.border }]}
             >
-              <Text style={styles.logoutText}>Sair</Text>
+              <Text style={[styles.logoutText, { color: colors.danger }]}>Sair</Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -102,16 +119,20 @@ const styles = StyleSheet.create({
     width: 48,
   },
   title: {
-    color: "#222",
     flex: 1,
     fontSize: 22,
     fontWeight: "700",
+  },
+  themeButton: {
+    alignItems: "center",
+    height: 48,
+    justifyContent: "center",
+    width: 48,
   },
   backdrop: {
     flex: 1,
   },
   menu: {
-    backgroundColor: "#fff",
     borderRadius: 6,
     elevation: 6,
     left: 8,
@@ -136,11 +157,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   logoutItem: {
-    borderTopColor: "#eee",
     borderTopWidth: 1,
   },
   logoutText: {
-    color: "#ef5350",
     fontSize: 16,
     fontWeight: "700",
   },

@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useAppTheme } from "../services/AppThemeContext";
 
 export function AuthForm({
   title,
@@ -14,10 +15,13 @@ export function AuthForm({
   onSubmit,
   onFooterPress,
 }) {
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
+
   return (
     <View style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
 
         {showName && (
           <TextInput
@@ -25,7 +29,11 @@ export function AuthForm({
             placeholder="Nome"
             value={values.name}
             onChangeText={(value) => onChange("name", value)}
-            style={styles.input}
+            placeholderTextColor={colors.mutedText}
+            style={[
+              styles.input,
+              { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text },
+            ]}
           />
         )}
 
@@ -35,7 +43,11 @@ export function AuthForm({
           placeholder="Email"
           value={values.email}
           onChangeText={(value) => onChange("email", value)}
-          style={styles.input}
+          placeholderTextColor={colors.mutedText}
+          style={[
+            styles.input,
+            { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text },
+          ]}
         />
 
         <TextInput
@@ -43,7 +55,11 @@ export function AuthForm({
           secureTextEntry
           value={values.password}
           onChangeText={(value) => onChange("password", value)}
-          style={styles.input}
+          placeholderTextColor={colors.mutedText}
+          style={[
+            styles.input,
+            { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text },
+          ]}
         />
 
         {showConfirmPassword && (
@@ -52,17 +68,21 @@ export function AuthForm({
             secureTextEntry
             value={values.confirmPassword}
             onChangeText={(value) => onChange("confirmPassword", value)}
-            style={styles.input}
+            placeholderTextColor={colors.mutedText}
+            style={[
+              styles.input,
+              { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text },
+            ]}
           />
         )}
 
-        {!!error && <Text style={styles.error}>{error}</Text>}
+        {!!error && <Text style={[styles.error, { color: colors.danger }]}>{error}</Text>}
 
         <TouchableOpacity
           activeOpacity={0.85}
           disabled={loading}
           onPress={onSubmit}
-          style={[styles.submitButton, loading && styles.disabledButton]}
+          style={[styles.submitButton, { backgroundColor: colors.primary }, loading && styles.disabledButton]}
         >
           <Text style={styles.submitButtonText}>
             {loading ? "Aguarde..." : submitLabel}
@@ -70,8 +90,8 @@ export function AuthForm({
         </TouchableOpacity>
 
         <TouchableOpacity activeOpacity={0.75} onPress={onFooterPress}>
-          <Text style={styles.footerText}>
-            {footerText} <Text style={styles.footerAction}>{footerActionLabel}</Text>
+          <Text style={[styles.footerText, { color: colors.mutedText }]}>
+            {footerText} <Text style={[styles.footerAction, { color: colors.primary }]}>{footerActionLabel}</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -91,30 +111,24 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   title: {
-    color: "#222",
     fontSize: 28,
     fontWeight: "800",
     marginBottom: 18,
   },
   input: {
-    backgroundColor: "#fff",
-    borderColor: "#ddd",
     borderRadius: 8,
     borderWidth: 1,
-    color: "#222",
     marginBottom: 12,
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
   error: {
-    color: "#d32f2f",
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 12,
   },
   submitButton: {
     alignItems: "center",
-    backgroundColor: "#ef5350",
     borderRadius: 8,
     marginBottom: 14,
     paddingVertical: 13,
@@ -127,12 +141,10 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   footerText: {
-    color: "#555",
     fontSize: 14,
     textAlign: "center",
   },
   footerAction: {
-    color: "#ef5350",
     fontWeight: "800",
   },
 });

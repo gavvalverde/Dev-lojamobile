@@ -12,9 +12,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAppTheme } from "../services/AppThemeContext";
 import { UserService } from "../services/UserService";
 
-const colorOptions = ["#ef5350", "#007AFF", "#34C759", "#8e44ad", "#f59f00"];
+const colorOptions = ["#ffc94a", "#039be5", "#06243a", "#ffffff", "#ff8f3d"];
 const badgeOptions = [
   "Colecionador",
   "Vendedor",
@@ -33,7 +34,25 @@ function normalizeHandle(value) {
     .slice(0, 24);
 }
 
+function getTextColorForProfileColor(color) {
+  return color === "#06243a" ? "#ffffff" : "#06243a";
+}
+
+function normalizeHexInput(value) {
+  const hex = String(value ?? "")
+    .replace(/[^0-9a-f]/gi, "")
+    .slice(0, 6);
+
+  return `#${hex}`;
+}
+
+function isValidHexColor(value) {
+  return /^#[0-9a-f]{6}$/i.test(String(value ?? ""));
+}
+
 export default function ProfileEditModal({ user, onSave, onCancel }) {
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
   const [form, setForm] = useState({
     name: user?.name || "",
     handle: user?.handle || "",
@@ -45,10 +64,12 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
     bio: user?.bio || "",
     photo: user?.photo || null,
     coverPhoto: user?.coverPhoto || null,
-    themeColor: user?.themeColor || "#ef5350",
+    themeColor: user?.themeColor || "#ffc94a",
     badges: user?.badges || [],
   });
   const [loading, setLoading] = useState(false);
+  const [customColor, setCustomColor] = useState(user?.themeColor || "#ffc94a");
+  const [customBadge, setCustomBadge] = useState("");
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -87,6 +108,33 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
     });
   };
 
+  const updateCustomColor = (value) => {
+    const nextColor = normalizeHexInput(value);
+    setCustomColor(nextColor);
+
+    if (isValidHexColor(nextColor)) {
+      updateField("themeColor", nextColor);
+    }
+  };
+
+  const addCustomBadge = () => {
+    const badge = customBadge.trim().slice(0, 24);
+    if (!badge) return;
+
+    setForm((current) => {
+      if (current.badges.includes(badge)) return current;
+      return { ...current, badges: [...current.badges, badge] };
+    });
+    setCustomBadge("");
+  };
+
+  const removeBadge = (badge) => {
+    setForm((current) => ({
+      ...current,
+      badges: current.badges.filter((item) => item !== badge),
+    }));
+  };
+
   const handleSave = async () => {
     if (!form.name.trim()) {
       Alert.alert("Erro", "Informe seu nome.");
@@ -114,32 +162,50 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
   };
 
   const handleLabel = form.handle ? `@${normalizeHandle(form.handle)}` : "@seu_usuario";
+  const selectedBadgeTextColor = getTextColorForProfileColor(form.themeColor);
+  const inputStyle = [
+    styles.input,
+    {
+      backgroundColor: colors.surfaceVariant,
+      borderColor: colors.border,
+      color: colors.text,
+    },
+  ];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topBar}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.topBar,
+          { backgroundColor: colors.secondary, borderBottomColor: colors.border },
+        ]}
+      >
         <TouchableOpacity onPress={onCancel} style={styles.iconButton}>
-          <MaterialCommunityIcons name="close" size={24} color="#222" />
+          <MaterialCommunityIcons name="close" size={24} color={colors.accent} />
         </TouchableOpacity>
-        <Text style={styles.topTitle}>Editar perfil</Text>
+        <Text style={[styles.topTitle, { color: colors.onPrimary }]}>Editar perfil</Text>
         <TouchableOpacity
           disabled={loading}
           onPress={handleSave}
-          style={[styles.saveButton, loading && styles.disabledButton]}
+          style={[
+            styles.saveButton,
+            { backgroundColor: colors.accent },
+            loading && styles.disabledButton,
+          ]}
         >
-          <Text style={styles.saveButtonText}>Salvar</Text>
+          <Text style={[styles.saveButtonText, { color: colors.onAccent }]}>Salvar</Text>
         </TouchableOpacity>
       </View>
 
       {loading && (
-        <View style={styles.loadingBar}>
+        <View style={[styles.loadingBar, { backgroundColor: colors.surface }]}>
           <ActivityIndicator size="small" color={form.themeColor} />
-          <Text style={styles.loadingText}>Atualizando perfil...</Text>
+          <Text style={[styles.loadingText, { color: colors.mutedText }]}>Atualizando perfil...</Text>
         </View>
       )}
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.preview}>
+        <View style={[styles.preview, { backgroundColor: colors.surface }]}>
           <View style={[styles.cover, { backgroundColor: form.themeColor }]}>
             {form.coverPhoto && (
               <Image source={{ uri: form.coverPhoto }} style={styles.coverImage} />
@@ -158,102 +224,166 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => pickImage("photo", [1, 1])}
-              style={[styles.avatar, { borderColor: form.themeColor }]}
+              style={[
+                styles.avatar,
+                { backgroundColor: colors.surfaceVariant, borderColor: form.themeColor },
+              ]}
             >
               {form.photo ? (
                 <Image source={{ uri: form.photo }} style={styles.avatarImage} />
               ) : (
-                <MaterialCommunityIcons name="account" size={46} color="#777" />
+                <MaterialCommunityIcons name="account" size={46} color={colors.mutedText} />
               )}
             </TouchableOpacity>
 
-            <Text style={styles.namePreview}>{form.name || "Seu nome"}</Text>
-            <Text style={styles.handlePreview}>{handleLabel}</Text>
+            <Text style={[styles.namePreview, { color: colors.text }]}>{form.name || "Seu nome"}</Text>
+            <Text style={[styles.handlePreview, { color: colors.mutedText }]}>{handleLabel}</Text>
             {!!form.status.trim() && (
               <View style={[styles.statusPill, { borderColor: form.themeColor }]}>
                 <View style={[styles.statusDot, { backgroundColor: form.themeColor }]} />
-                <Text style={styles.statusText}>{form.status.trim()}</Text>
+                <Text style={[styles.statusText, { color: colors.text }]}>{form.status.trim()}</Text>
               </View>
             )}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Identidade</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Identidade</Text>
           <TextInput
             value={form.name}
             onChangeText={(value) => updateField("name", value)}
             placeholder="Nome visivel"
-            style={styles.input}
+            placeholderTextColor={colors.mutedText}
+            style={inputStyle}
           />
           <TextInput
             autoCapitalize="none"
             value={form.handle}
             onChangeText={(value) => updateField("handle", normalizeHandle(value))}
             placeholder="@usuario"
-            style={styles.input}
+            placeholderTextColor={colors.mutedText}
+            style={inputStyle}
           />
           <View style={styles.inlineInputs}>
             <TextInput
               value={form.pronouns}
               onChangeText={(value) => updateField("pronouns", value)}
               placeholder="Pronomes"
-              style={[styles.input, styles.inlineInput]}
+              placeholderTextColor={colors.mutedText}
+              style={[...inputStyle, styles.inlineInput]}
             />
             <TextInput
               value={form.location}
               onChangeText={(value) => updateField("location", value)}
               placeholder="Cidade"
-              style={[styles.input, styles.inlineInput]}
+              placeholderTextColor={colors.mutedText}
+              style={[...inputStyle, styles.inlineInput]}
             />
           </View>
           <TextInput
             value={form.status}
             onChangeText={(value) => updateField("status", value)}
             placeholder="Status do perfil"
-            style={styles.input}
+            placeholderTextColor={colors.mutedText}
+            style={inputStyle}
           />
           <TextInput
             value={form.favoritePokemon}
             onChangeText={(value) => updateField("favoritePokemon", value)}
             placeholder="Carta ou Pokemon favorito"
-            style={styles.input}
+            placeholderTextColor={colors.mutedText}
+            style={inputStyle}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bio</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Bio</Text>
           <TextInput
             value={form.bio}
             onChangeText={(value) => updateField("bio", value)}
             maxLength={240}
             multiline
             placeholder="Escreva uma bio com cara de perfil publico."
-            style={[styles.input, styles.bioInput]}
+            placeholderTextColor={colors.mutedText}
+            style={[...inputStyle, styles.bioInput]}
           />
-          <Text style={styles.counter}>{form.bio.length}/240</Text>
+          <Text style={[styles.counter, { color: colors.mutedText }]}>{form.bio.length}/240</Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cor do perfil</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Cor do perfil</Text>
           <View style={styles.swatches}>
             {colorOptions.map((color) => (
               <TouchableOpacity
                 accessibilityLabel={`Selecionar cor ${color}`}
                 key={color}
-                onPress={() => updateField("themeColor", color)}
+                onPress={() => {
+                  setCustomColor(color);
+                  updateField("themeColor", color);
+                }}
                 style={[
                   styles.swatch,
-                  { backgroundColor: color },
-                  form.themeColor === color && styles.swatchSelected,
+                  { backgroundColor: color, borderColor: colors.surface },
+                  form.themeColor === color && { borderColor: colors.accent },
                 ]}
               />
             ))}
           </View>
+          <TextInput
+            autoCapitalize="none"
+            maxLength={7}
+            onChangeText={updateCustomColor}
+            placeholder="#ffc94a"
+            placeholderTextColor={colors.mutedText}
+            style={[...inputStyle, styles.customColorInput]}
+            value={customColor}
+          />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Insignias</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Insignias</Text>
+          {form.badges.length > 0 && (
+            <View style={styles.selectedBadges}>
+              {form.badges.map((badge) => (
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  key={badge}
+                  onPress={() => removeBadge(badge)}
+                  style={[
+                    styles.selectedBadge,
+                    { backgroundColor: form.themeColor, borderColor: form.themeColor },
+                  ]}
+                >
+                  <Text style={[styles.selectedBadgeText, { color: selectedBadgeTextColor }]}>
+                    {badge}
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="close"
+                    size={14}
+                    color={selectedBadgeTextColor}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          <View style={styles.customBadgeRow}>
+            <TextInput
+              maxLength={24}
+              onChangeText={setCustomBadge}
+              onSubmitEditing={addCustomBadge}
+              placeholder="Nova insignia"
+              placeholderTextColor={colors.mutedText}
+              style={[...inputStyle, styles.customBadgeInput]}
+              value={customBadge}
+            />
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={addCustomBadge}
+              style={[styles.addBadgeButton, { backgroundColor: colors.accent }]}
+            >
+              <MaterialCommunityIcons name="plus" size={22} color={colors.onAccent} />
+            </TouchableOpacity>
+          </View>
           <View style={styles.badgeGrid}>
             {badgeOptions.map((badge) => {
               const selected = form.badges.includes(badge);
@@ -264,10 +394,17 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
                   onPress={() => toggleBadge(badge)}
                   style={[
                     styles.badgeOption,
+                    { borderColor: colors.border },
                     selected && { backgroundColor: form.themeColor, borderColor: form.themeColor },
                   ]}
                 >
-                  <Text style={[styles.badgeText, selected && styles.badgeTextSelected]}>
+                  <Text
+                    style={[
+                      styles.badgeText,
+                      { color: colors.text },
+                      selected && { color: selectedBadgeTextColor },
+                    ]}
+                  >
                     {badge}
                   </Text>
                 </TouchableOpacity>
@@ -276,14 +413,15 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Contato privado</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Contato privado</Text>
           <TextInput
             keyboardType="phone-pad"
             value={form.phone}
             onChangeText={(value) => updateField("phone", value)}
             placeholder="Telefone"
-            style={styles.input}
+            placeholderTextColor={colors.mutedText}
+            style={inputStyle}
           />
         </View>
       </ScrollView>
@@ -293,13 +431,10 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f5f6fa",
     flex: 1,
   },
   topBar: {
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderBottomColor: "#e8e8e8",
     borderBottomWidth: 1,
     flexDirection: "row",
     gap: 12,
@@ -314,13 +449,11 @@ const styles = StyleSheet.create({
     width: 44,
   },
   topTitle: {
-    color: "#222",
     flex: 1,
     fontSize: 18,
     fontWeight: "800",
   },
   saveButton: {
-    backgroundColor: "#222",
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -334,14 +467,12 @@ const styles = StyleSheet.create({
   },
   loadingBar: {
     alignItems: "center",
-    backgroundColor: "#fff",
     flexDirection: "row",
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
   loadingText: {
-    color: "#555",
     fontSize: 13,
     fontWeight: "600",
   },
@@ -350,7 +481,6 @@ const styles = StyleSheet.create({
     paddingBottom: 34,
   },
   preview: {
-    backgroundColor: "#fff",
     borderRadius: 8,
     marginBottom: 14,
     overflow: "hidden",
@@ -390,7 +520,6 @@ const styles = StyleSheet.create({
   },
   avatar: {
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
     borderRadius: 46,
     borderWidth: 4,
     height: 92,
@@ -404,14 +533,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   namePreview: {
-    color: "#222",
     fontSize: 22,
     fontWeight: "900",
     marginTop: 10,
     textAlign: "center",
   },
   handlePreview: {
-    color: "#666",
     fontSize: 14,
     fontWeight: "700",
     marginTop: 2,
@@ -432,18 +559,15 @@ const styles = StyleSheet.create({
     width: 8,
   },
   statusText: {
-    color: "#333",
     fontSize: 13,
     fontWeight: "700",
   },
   section: {
-    backgroundColor: "#fff",
     borderRadius: 8,
     marginBottom: 12,
     padding: 14,
   },
   sectionTitle: {
-    color: "#555",
     fontSize: 12,
     fontWeight: "900",
     letterSpacing: 0,
@@ -451,11 +575,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   input: {
-    backgroundColor: "#f8f8f8",
-    borderColor: "#dedede",
     borderRadius: 8,
     borderWidth: 1,
-    color: "#222",
     marginBottom: 10,
     minHeight: 44,
     paddingHorizontal: 12,
@@ -473,7 +594,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   counter: {
-    color: "#777",
     fontSize: 12,
     fontWeight: "700",
     textAlign: "right",
@@ -481,35 +601,66 @@ const styles = StyleSheet.create({
   swatches: {
     flexDirection: "row",
     gap: 12,
+    marginBottom: 10,
   },
   swatch: {
-    borderColor: "#fff",
     borderRadius: 18,
     borderWidth: 3,
     height: 36,
     width: 36,
-  },
-  swatchSelected: {
-    borderColor: "#222",
   },
   badgeGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
   },
+  customColorInput: {
+    marginBottom: 0,
+  },
+  selectedBadges: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 10,
+  },
+  selectedBadge: {
+    alignItems: "center",
+    borderRadius: 999,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 8,
+  },
+  selectedBadgeText: {
+    fontSize: 13,
+    fontWeight: "900",
+  },
+  customBadgeRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 10,
+  },
+  customBadgeInput: {
+    flex: 1,
+    marginBottom: 0,
+  },
+  addBadgeButton: {
+    alignItems: "center",
+    borderRadius: 8,
+    height: 44,
+    justifyContent: "center",
+    width: 48,
+  },
   badgeOption: {
-    borderColor: "#ddd",
     borderRadius: 999,
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   badgeText: {
-    color: "#333",
     fontSize: 13,
     fontWeight: "800",
-  },
-  badgeTextSelected: {
-    color: "#fff",
   },
 });

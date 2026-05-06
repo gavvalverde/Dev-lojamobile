@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useAppTheme } from "../services/AppThemeContext";
 
 const ICON_MAP = {
   "views/ProfileView": "account",
@@ -8,6 +9,8 @@ const ICON_MAP = {
 };
 
 export default function BottomTabBar({ state, descriptors, navigation }) {
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
   const visibleTabs = [
     "views/ProfileView",
     "views/HomeView",
@@ -18,7 +21,12 @@ export default function BottomTabBar({ state, descriptors, navigation }) {
   );
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.surface, borderTopColor: colors.border },
+      ]}
+    >
       {filteredRoutes.map((route) => {
         const { options } = descriptors[route.key];
         const isFocused = state.routes[state.index]?.key === route.key;
@@ -56,11 +64,17 @@ export default function BottomTabBar({ state, descriptors, navigation }) {
             onLongPress={onLongPress}
             style={[styles.tabButton, isHome && styles.homeButton]}
           >
-            <View style={[styles.iconWrapper, isHome && styles.homeIconWrapper]}>
+            <View
+              style={[
+                styles.iconWrapper,
+                isHome && styles.homeIconWrapper,
+                isHome && { backgroundColor: colors.accent },
+              ]}
+            >
               <MaterialCommunityIcons
                 name={iconName}
                 size={isHome ? 28 : 24}
-                color={isFocused ? "#007AFF" : "#999"}
+                color={isFocused ? colors.primary : colors.mutedText}
               />
             </View>
           </TouchableOpacity>
@@ -75,9 +89,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
     paddingTop: 8,
     paddingBottom: 10,
     paddingHorizontal: 24,
@@ -101,6 +113,5 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "rgba(0, 122, 255, 0.08)",
   },
 });
