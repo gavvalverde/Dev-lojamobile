@@ -1,0 +1,4 @@
+﻿
+# Backups locais
+backup_*/
+*.bak
