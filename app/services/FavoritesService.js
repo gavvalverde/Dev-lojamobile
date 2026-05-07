@@ -11,7 +11,7 @@ let hydratePromise = null;
 
 const defaultFavoriteFields = {
   aVenda: false,
-  idioma: "Portugues",
+  idioma: "Português",
   qualidade: "NM",
 };
 

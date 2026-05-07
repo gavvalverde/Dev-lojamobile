@@ -55,7 +55,7 @@ function CardDetailsViewContent() {
   useEffect(() => {
     if (!cardId) {
       setLoading(false);
-      setError("ID do produto nao fornecido");
+      setError("ID do produto não fornecido");
       return;
     }
 
@@ -107,7 +107,7 @@ function CardDetailsViewContent() {
   if (!produto) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
-        <Text style={{ color: colors.text }}>Produto nao encontrado ou ID invalido.</Text>
+        <Text style={{ color: colors.text }}>Produto não encontrado ou ID inválido.</Text>
       </View>
     );
   }
@@ -133,9 +133,9 @@ function CardDetailsViewContent() {
         <View style={styles.details}>
           <Text style={[styles.name, { color: colors.text }]}>{produto.name}</Text>
           <Text style={[styles.collectionNumber, { color: colors.primary }]}>
-            {produto.collectionNumber || "Posicao na colecao indisponivel"}
+            {produto.collectionNumber || "Posição na coleção indisponivel"}
           </Text>
-          <Text style={[styles.set, { color: colors.mutedText }]}>{produto.set || "Sem colecao"}</Text>
+          <Text style={[styles.set, { color: colors.mutedText }]}>{produto.set || "Sem coleção"}</Text>
           <Text style={[styles.rarity, { color: colors.mutedText }]}>{produto.rarity || "Sem raridade"}</Text>
 
           <Text style={[styles.pricesTitle, { color: colors.text }]}>Anuncios desta carta</Text>

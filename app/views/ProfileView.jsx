@@ -156,7 +156,7 @@ export default function ProfileView() {
               <View style={[styles.statusPill, { borderColor: themeColor }]}>
                 <View style={[styles.statusDot, { backgroundColor: themeColor }]} />
                 <Text style={[styles.statusText, { color: colors.text }]}>
-                  {user.status || "Montando minha colecao"}
+                  {user.status || "Montando minha coleção"}
                 </Text>
               </View>
 
@@ -199,7 +199,7 @@ export default function ProfileView() {
               <View style={styles.showcaseTextBlock}>
                 <Text style={[styles.showcaseLabel, { color: colors.mutedText }]}>Carta ou Pokemon favorito</Text>
                 <Text style={[styles.showcaseValue, { color: colors.text }, !user.favoritePokemon && styles.emptyText]}>
-                  {user.favoritePokemon || "Ainda nao escolhido"}
+                  {user.favoritePokemon || "Ainda não escolhido"}
                 </Text>
               </View>
             </View>
@@ -214,7 +214,7 @@ export default function ProfileView() {
             <View style={styles.infoRow}>
               <MaterialCommunityIcons name="phone-outline" size={20} color={colors.mutedText} />
               <Text style={[styles.infoText, { color: colors.text }, !user.phone && styles.emptyText]}>
-                {user.phone || "Telefone nao informado"}
+                {user.phone || "Telefone não informado"}
               </Text>
             </View>
           </View>

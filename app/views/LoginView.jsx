@@ -36,7 +36,7 @@ export default function LoginView() {
         values={values}
         error={error}
         loading={loading}
-        footerText="Ainda nao tem conta?"
+        footerText="Ainda não tem conta?"
         footerActionLabel="Cadastrar"
         onChange={updateValue}
         onSubmit={submit}

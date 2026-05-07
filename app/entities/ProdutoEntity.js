@@ -51,9 +51,9 @@ export default class ProdutoEntity {
     // Extrai o nome do set corretamente
     const setName = typeof d?.set === 'string' 
       ? d.set 
-      : (d?.set?.name ?? d?.colecao ?? '');
+      : (d?.set?.name ?? d?.coleção ?? '');
     const cardNumber = d?.number ?? d?.numero;
-    const setTotal = d?.set?.printedTotal ?? d?.set?.total ?? d?.totalColecao;
+    const setTotal = d?.set?.printedTotal ?? d?.set?.total ?? d?.totalColeção;
     const collectionNumber = cardNumber && setTotal ? `${cardNumber}/${setTotal}` : '';
     
     return new ProdutoEntity(
@@ -66,7 +66,7 @@ export default class ProdutoEntity {
       d?.favorito ?? d?.favorite,
       d?.flavorText ?? d?.descricao ?? d?.description,
       d?.estoque ?? d?.stock,
-      d?.collectionNumber ?? d?.posicaoColecao ?? collectionNumber
+      d?.collectionNumber ?? d?.posicaoColeção ?? collectionNumber
     );
   }
 }

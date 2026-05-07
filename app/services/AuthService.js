@@ -101,7 +101,7 @@ export const AuthService = {
     if (String(password ?? "").length < 6) {
       throw new Error("A senha precisa ter pelo menos 6 caracteres.");
     }
-    if (password !== confirmPassword) throw new Error("As senhas nao conferem.");
+    if (password !== confirmPassword) throw new Error("As senhas não conferem.");
 
     const users = await readUsers();
     const exists = users.some((user) => user.email === normalizedEmail);
@@ -129,7 +129,7 @@ export const AuthService = {
       (item) => item.email === normalizedEmail && item.password === password
     );
 
-    if (!user) throw new Error("Email ou senha invalidos.");
+    if (!user) throw new Error("Email ou senha inválidos.");
 
     currentUser = user.toSession();
     await setItem(SESSION_KEY, JSON.stringify(currentUser));

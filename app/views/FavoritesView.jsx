@@ -19,10 +19,10 @@ import { useAppTheme } from "../services/AppThemeContext";
 
 const saleOptions = [
   { label: "Sim", value: true },
-  { label: "Nao", value: false },
+  { label: "Não", value: false },
 ];
 
-const languageOptions = ["Portugues", "Ingles", "Japones", "Espanhol", "Frances"];
+const languageOptions = ["Português", "Inglês", "Japonês", "Espanhol", "Francês"];
 const qualityOptions = ["NM", "LP", "MP", "HP", "DMG"];
 
 function formatMoneyInput(value) {
@@ -67,7 +67,7 @@ function FavoritesViewContent() {
   const spacing = 12;
   const cardWidth = (width - spacing * (numColumns + 1)) / numColumns;
   const cardHeight = cardWidth / 0.716;
-  const saleLabel = draft?.aVenda ? "Sim" : "Nao";
+  const saleLabel = draft?.aVenda ? "Sim" : "Não";
 
   useEffect(() => {
     const unsubscribe = FavoritesService.subscribe(setFavorites);
@@ -83,7 +83,7 @@ function FavoritesViewContent() {
     setDraft({
       aVenda: item.aVenda ?? false,
       price: normalizeMoneyValue(item.price),
-      idioma: item.idioma ?? "Portugues",
+      idioma: item.idioma ?? "Português",
       qualidade: item.qualidade ?? "NM",
     });
     setOpenDropdown(null);
@@ -200,14 +200,14 @@ function FavoritesViewContent() {
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhuma carta favorita</Text>
             <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-              Toque em Fav nas cartas do catalogo para montar sua lista.
+              Toque em Fav nas cartas do catálogo para montar sua lista.
             </Text>
             <TouchableOpacity
               style={[styles.catalogButton, { backgroundColor: colors.primary }]}
               onPress={() => router.push("/")}
               activeOpacity={0.85}
             >
-              <Text style={styles.catalogButtonText}>Ver catalogo</Text>
+              <Text style={styles.catalogButtonText}>Ver catálogo</Text>
             </TouchableOpacity>
           </View>
         }
@@ -232,7 +232,7 @@ function FavoritesViewContent() {
             {aVendaDropdown}
 
             <View style={styles.field}>
-              <Text style={[styles.inputLabel, { color: colors.mutedText }]}>Preco</Text>
+              <Text style={[styles.inputLabel, { color: colors.mutedText }]}>Preço</Text>
               <TextInput
                 value={String(draft?.price ?? "")}
                 onChangeText={(price) =>

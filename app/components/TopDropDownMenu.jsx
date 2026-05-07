@@ -13,7 +13,7 @@ import { useAppTheme } from "../services/AppThemeContext";
 import { AuthService } from "../services/AuthService";
 
 const menuItems = [
-  { label: "Catalogo TCG", path: "/views/HomeView" },
+  { label: "Catálogo TCG", path: "/views/HomeView" },
   { label: "Favoritos", path: "/views/FavoritesView" },
 ];
 

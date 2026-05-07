@@ -29,7 +29,7 @@ export default class AnuncioEntity {
     this.set = card.set ?? "";
     this.price = card.price ?? "";
     this.unitPrice = parsePrice(card.price);
-    this.idioma = card.idioma ?? "Portugues";
+    this.idioma = card.idioma ?? "Português";
     this.qualidade = card.qualidade ?? "NM";
     this.aVenda = !!card.aVenda;
     this.seller = normalizeSeller(card.seller ?? card.vendedor);

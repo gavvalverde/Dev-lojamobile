@@ -76,7 +76,7 @@ export default function HomeView() {
         console.error("Erro ao buscar cartas na API:", error);
         if (active) {
           setApiCards([]);
-          setSearchError("Nao foi possivel buscar cartas agora.");
+          setSearchError("Não foi possivel buscar cartas agora.");
         }
       } finally {
         if (active) setSearchLoading(false);
