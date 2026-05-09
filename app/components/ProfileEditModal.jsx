@@ -21,7 +21,7 @@ const badgeOptions = [
   "Vendedor",
   "Deck builder",
   "Trocas",
-  "Leilao",
+  "Leilão",
   "Arte favorita",
   "Competitivo",
 ];
@@ -372,7 +372,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
               maxLength={24}
               onChangeText={setCustomBadge}
               onSubmitEditing={addCustomBadge}
-              placeholder="Nova insignia"
+              placeholder="Nova insígnia"
               placeholderTextColor={colors.mutedText}
               style={[...inputStyle, styles.customBadgeInput]}
               value={customBadge}

@@ -146,7 +146,7 @@ export default function AuctionView() {
 
   const createAuctions = async () => {
     if (!canCreateAuction) {
-      Alert.alert("Acesso restrito", "Apenas perfis com a insignia Leilao podem criar leilões.");
+      Alert.alert("Acesso restrito", "Apenas perfis com a insígnia Leilão podem criar leilões.");
       return;
     }
 
@@ -257,7 +257,7 @@ export default function AuctionView() {
             <TextInput
               multiline
               onChangeText={(value) => updateCardDraft(item.id, "description", value)}
-              placeholder="Descricao desta carta no leilao"
+              placeholder="Descrição desta carta no leilão"
               placeholderTextColor={colors.mutedText}
               style={[
                 styles.input,
@@ -368,7 +368,7 @@ export default function AuctionView() {
 
         {isOwnAuction && (
           <Text style={[styles.helperText, { color: colors.mutedText }]}>
-            Este leilao e seu; outros perfis podem dar lances nele.
+            Este leilão é seu; outros perfis podem dar lances nele.
           </Text>
         )}
       </View>
@@ -405,7 +405,7 @@ export default function AuctionView() {
               <Text style={[styles.ruleText, { color: colors.text }]}>
                 {canCreateAuction
                   ? "Selecione uma ou mais cartas de Minhas Cartas e defina o lance minimo e a duracao de cada uma."
-                  : "Somente perfis com a insignia Leilao podem criar leilões. Voce pode participar dando lances."}
+                  : "Somente perfis com a insígnia Leilão podem criar leilões. Você pode participar dando lances."}
               </Text>
             </View>
 
@@ -458,9 +458,9 @@ export default function AuctionView() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <MaterialCommunityIcons name="gavel" size={42} color={colors.mutedText} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhum leilao publicado</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhum leilão publicado</Text>
             <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-              Quando um perfil com a insignia Leilao publicar uma carta, ela aparece aqui.
+              Quando um perfil com a insígnia Leilão publicar uma carta, ela aparece aqui.
             </Text>
           </View>
         }

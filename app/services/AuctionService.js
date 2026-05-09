@@ -124,9 +124,9 @@ export const AuctionService = {
     const price = Number(String(startPrice ?? "").replace(",", "."));
     const hours = Math.max(1, Number(durationHours) || 24);
 
-    if (!seller?.id) throw new Error("Entre na sua conta para criar um leilao.");
-    if (!normalizedTitle) throw new Error("Informe um titulo para o leilao.");
-    if (!normalizedCardName) throw new Error("Informe a carta do leilao.");
+    if (!seller?.id) throw new Error("Entre na sua conta para criar um leilão.");
+    if (!normalizedTitle) throw new Error("Informe um título para o leilão.");
+    if (!normalizedCardName) throw new Error("Informe a carta do leilão.");
     if (!Number.isFinite(price) || price <= 0) {
       throw new Error("Informe um lance inicial valido.");
     }
@@ -158,12 +158,12 @@ export const AuctionService = {
     const amount = Number(String(rawAmount ?? "").replace(",", "."));
     const auction = auctions.find((item) => item.id === auctionId);
 
-    if (!auction) throw new Error("Leilao não encontrado.");
+    if (!auction) throw new Error("Leilão não encontrado.");
     if (!bidder?.id) throw new Error("Entre na sua conta para dar lance.");
     if (auction.seller?.id === bidder.id) {
-      throw new Error("Voce não pode dar lance no proprio leilao.");
+      throw new Error("Você não pode dar lance no próprio leilão.");
     }
-    if (isClosed(auction)) throw new Error("Este leilao ja foi encerrado.");
+    if (isClosed(auction)) throw new Error("Este leilão já foi encerrado.");
 
     const currentValue = getHighestBid(auction);
     if (!Number.isFinite(amount) || amount <= currentValue) {

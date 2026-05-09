@@ -173,7 +173,7 @@ export default function UsersManagementView() {
           </View>
           {isCurrent && (
             <View style={[styles.currentPill, { backgroundColor: colors.accent }]}>
-              <Text style={[styles.currentText, { color: colors.onAccent }]}>Voce</Text>
+              <Text style={[styles.currentText, { color: colors.onAccent }]}>Você</Text>
             </View>
           )}
         </View>
@@ -221,7 +221,7 @@ export default function UsersManagementView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title="Gerenciar usuarios" />
+      <TopDropDownMenu title="Gerenciar usuários" />
 
       <FlatList
         data={filteredUsers}
@@ -232,9 +232,9 @@ export default function UsersManagementView() {
           <View>
             <View style={[styles.summary, { backgroundColor: colors.secondary }]}>
               <View>
-                <Text style={[styles.summaryTitle, { color: colors.onPrimary }]}>Usuarios</Text>
+                <Text style={[styles.summaryTitle, { color: colors.onPrimary }]}>Usuários</Text>
                 <Text style={[styles.summaryText, { color: colors.accent }]}>
-                  {stats.total} conta(s) - {stats.auctionUsers} com Leilao - {stats.adminUsers} admin
+                  {stats.total} conta(s) - {stats.auctionUsers} com Leilão - {stats.adminUsers} admin
                 </Text>
               </View>
               <MaterialCommunityIcons name="account-group" size={44} color={colors.accent} />
@@ -243,7 +243,7 @@ export default function UsersManagementView() {
             <TextInput
               autoCapitalize="none"
               onChangeText={setSearch}
-              placeholder="Buscar por nome, email, status ou insignia"
+              placeholder="Buscar por nome, email, status ou insígnia"
               placeholderTextColor={colors.mutedText}
               style={[
                 styles.searchInput,

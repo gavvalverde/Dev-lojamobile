@@ -157,7 +157,7 @@ export const UserService = {
   async deleteUser(userId) {
     const session = await getSession();
     if (session?.id === userId) {
-      throw new Error("Voce não pode remover o usuário da sessao atual.");
+      throw new Error("Você não pode remover o usuário da sessao atual.");
     }
 
     const users = await readUsers();
