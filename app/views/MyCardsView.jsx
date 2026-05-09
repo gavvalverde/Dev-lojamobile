@@ -185,7 +185,7 @@ function MyCardsViewContent() {
     </View>
   );
 
-  const aVendaDropdown = draft ? renderDropdown("aVenda", "Item a venda", saleLabel, saleOptions) : null;
+  const aVendaDropdown = draft ? renderDropdown("aVenda", "Item à venda", saleLabel, saleOptions) : null;
   const idiomaDropdown = draft ? renderDropdown("idioma", "Idioma", draft.idioma, languageOptions) : null;
   const qualidadeDropdown = draft ? renderDropdown("qualidade", "Qualidade", draft.qualidade, qualityOptions) : null;
 
@@ -206,9 +206,9 @@ function MyCardsViewContent() {
         columnWrapperStyle={{ justifyContent: "space-between", marginBottom: spacing }}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhuma carta na sua colecao</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhuma carta na sua coleção</Text>
             <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-              Toque em Minhas nas cartas do catalogo para montar sua colecao.
+              Toque em Minhas nas cartas do catálogo para montar sua coleção.
             </Text>
             <TouchableOpacity
               style={[styles.catalogButton, { backgroundColor: colors.primary }]}

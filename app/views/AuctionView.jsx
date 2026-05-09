@@ -146,7 +146,7 @@ export default function AuctionView() {
 
   const createAuctions = async () => {
     if (!canCreateAuction) {
-      Alert.alert("Acesso restrito", "Apenas perfis com a insignia Leilao podem criar leiloes.");
+      Alert.alert("Acesso restrito", "Apenas perfis com a insignia Leilao podem criar leilões.");
       return;
     }
 
@@ -216,7 +216,7 @@ export default function AuctionView() {
               {item.name}
             </Text>
             <Text numberOfLines={1} style={[styles.selectorMeta, { color: colors.mutedText }]}>
-              {item.set || "Sem colecao"} {getCardCode(item) ? `- ${getCardCode(item)}` : ""}
+              {item.set || "Sem coleção"} {getCardCode(item) ? `- ${getCardCode(item)}` : ""}
             </Text>
           </View>
           <MaterialCommunityIcons
@@ -377,7 +377,7 @@ export default function AuctionView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title="Leiloes Yellow Duck" />
+      <TopDropDownMenu title="Leilões Yellow Duck" />
 
       <FlatList
         data={auctions}
@@ -388,7 +388,7 @@ export default function AuctionView() {
           <View>
             <View style={[styles.hero, { backgroundColor: colors.secondary }]}>
               <View style={styles.heroText}>
-                <Text style={[styles.heroTitle, { color: colors.onPrimary }]}>Leiloes TCG</Text>
+                <Text style={[styles.heroTitle, { color: colors.onPrimary }]}>Leilões TCG</Text>
                 <Text style={[styles.heroSubtitle, { color: colors.accent }]}>
                   {stats.activeCount} aberto(s) - {stats.bidCount} lance(s)
                 </Text>
@@ -405,7 +405,7 @@ export default function AuctionView() {
               <Text style={[styles.ruleText, { color: colors.text }]}>
                 {canCreateAuction
                   ? "Selecione uma ou mais cartas de Minhas Cartas e defina o lance minimo e a duracao de cada uma."
-                  : "Somente perfis com a insignia Leilao podem criar leiloes. Voce pode participar dando lances."}
+                  : "Somente perfis com a insignia Leilao podem criar leilões. Voce pode participar dando lances."}
               </Text>
             </View>
 
@@ -452,7 +452,7 @@ export default function AuctionView() {
               </View>
             )}
 
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Leiloes ativos e recentes</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Leilões ativos e recentes</Text>
           </View>
         }
         ListEmptyComponent={

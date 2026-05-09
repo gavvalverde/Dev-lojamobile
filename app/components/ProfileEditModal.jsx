@@ -261,7 +261,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
             autoCapitalize="none"
             value={form.handle}
             onChangeText={(value) => updateField("handle", normalizeHandle(value))}
-            placeholder="@usuario"
+            placeholder="@usuário"
             placeholderTextColor={colors.mutedText}
             style={inputStyle}
           />

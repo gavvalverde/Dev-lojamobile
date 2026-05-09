@@ -78,14 +78,14 @@ function FavoritesViewContent() {
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhuma carta favorita</Text>
             <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-              Toque em Favorito nas cartas do catalogo para montar sua lista.
+              Toque em Favorito nas cartas do catálogo para montar sua lista.
             </Text>
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => router.push("/views/HomeView")}
               style={[styles.catalogButton, { backgroundColor: colors.primary }]}
             >
-              <Text style={styles.catalogButtonText}>Ver catalogo</Text>
+              <Text style={styles.catalogButtonText}>Ver catálogo</Text>
             </TouchableOpacity>
           </View>
         }

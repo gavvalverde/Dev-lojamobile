@@ -60,7 +60,7 @@ export default function ProfileView() {
     return [
       { label: "Favoritas", value: favorites.length },
       { label: "Minhas", value: myCards.length },
-      { label: "A venda", value: saleCount },
+      { label: "À venda", value: saleCount },
       { label: "Insignias", value: user?.badges?.length ?? 0 },
     ];
   }, [favorites.length, myCards, user?.badges?.length]);

@@ -80,7 +80,7 @@ export default function HomeView() {
         console.error("Erro ao buscar cartas na API:", error);
         if (active) {
           setApiCards([]);
-          setSearchError("Não foi possivel buscar cartas agora.");
+          setSearchError("Não foi possível buscar cartas agora.");
         }
       } finally {
         if (active) setSearchLoading(false);
@@ -178,7 +178,7 @@ export default function HomeView() {
             />
 
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {search.trim() ? "Cartas encontradas" : "Cartas a venda"}
+              {search.trim() ? "Cartas encontradas" : "Cartas à venda"}
             </Text>
             {searchLoading && (
               <Text style={[styles.searchStatus, { color: colors.mutedText }]}>Buscando na API...</Text>
@@ -191,12 +191,12 @@ export default function HomeView() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta a venda"}
+              {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta à venda"}
             </Text>
             <Text style={[styles.emptyText, { color: colors.mutedText }]}>
               {search.trim()
                 ? "Tente buscar por outro nome de carta Pokemon TCG."
-                : "Va em Minhas Cartas, toque em Editar e marque uma carta como item a venda."}
+                : "Vá em Minhas Cartas, toque em Editar e marque uma carta como item à venda."}
             </Text>
             {!search.trim() && (
               <TouchableOpacity

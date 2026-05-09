@@ -107,13 +107,13 @@ export const UserService = {
     const userIndex = users.findIndex((u) => u.id === userId);
 
     if (userIndex === -1) {
-      throw new Error("Usuario nao encontrado.");
+      throw new Error("Usuario não encontrado.");
     }
 
     const normalizedEmail = String(updates.email ?? "").trim().toLowerCase();
     const normalizedName = String(updates.name ?? "").trim();
 
-    if (!normalizedName) throw new Error("Informe o nome do usuario.");
+    if (!normalizedName) throw new Error("Informe o nome do usuário.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       throw new Error("Informe um email valido.");
     }
@@ -121,7 +121,7 @@ export const UserService = {
     const emailInUse = users.some(
       (user) => user.id !== userId && user.email === normalizedEmail
     );
-    if (emailInUse) throw new Error("Ja existe outro usuario com este email.");
+    if (emailInUse) throw new Error("Ja existe outro usuário com este email.");
 
     const user = users[userIndex];
     const updatedUser = new UserEntity(
@@ -157,14 +157,14 @@ export const UserService = {
   async deleteUser(userId) {
     const session = await getSession();
     if (session?.id === userId) {
-      throw new Error("Voce nao pode remover o usuario da sessao atual.");
+      throw new Error("Voce não pode remover o usuário da sessao atual.");
     }
 
     const users = await readUsers();
     const nextUsers = users.filter((user) => user.id !== userId);
 
     if (nextUsers.length === users.length) {
-      throw new Error("Usuario nao encontrado.");
+      throw new Error("Usuario não encontrado.");
     }
 
     await writeUsers(nextUsers);

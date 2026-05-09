@@ -138,8 +138,8 @@ export default function UsersManagementView() {
 
   const confirmDelete = (user) => {
     Alert.alert(
-      "Remover usuario",
-      `Deseja remover ${user.name}? Esta acao nao remove leiloes ou favoritos ja salvos.`,
+      "Remover usuário",
+      `Deseja remover ${user.name}? Esta ação não remove leilões ou favoritos já salvos.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -260,7 +260,7 @@ export default function UsersManagementView() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <MaterialCommunityIcons name="account-search" size={42} color={colors.mutedText} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhum usuario encontrado</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhum usuário encontrado</Text>
             <Text style={[styles.emptyText, { color: colors.mutedText }]}>
               Ajuste a busca ou crie uma nova conta pelo cadastro.
             </Text>
@@ -272,7 +272,7 @@ export default function UsersManagementView() {
         <Pressable style={[styles.modalBackdrop, { backgroundColor: colors.overlay }]} onPress={() => setEditingUser(null)}>
           <Pressable style={[styles.modalCard, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Editar usuario</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Editar usuário</Text>
               <TouchableOpacity onPress={() => setEditingUser(null)} style={styles.iconButton}>
                 <MaterialCommunityIcons name="close" size={24} color={colors.mutedText} />
               </TouchableOpacity>

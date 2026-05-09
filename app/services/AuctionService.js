@@ -158,10 +158,10 @@ export const AuctionService = {
     const amount = Number(String(rawAmount ?? "").replace(",", "."));
     const auction = auctions.find((item) => item.id === auctionId);
 
-    if (!auction) throw new Error("Leilao nao encontrado.");
+    if (!auction) throw new Error("Leilao não encontrado.");
     if (!bidder?.id) throw new Error("Entre na sua conta para dar lance.");
     if (auction.seller?.id === bidder.id) {
-      throw new Error("Voce nao pode dar lance no proprio leilao.");
+      throw new Error("Voce não pode dar lance no proprio leilao.");
     }
     if (isClosed(auction)) throw new Error("Este leilao ja foi encerrado.");
 

@@ -1,0 +1,5 @@
+style: Restaurar acentuação e ortografia em toda a interface
+
+Corrige a ausência de acentos em diversas palavras do idioma português ao longo do aplicativo (como "usuário", "leilões", "catálogo", "coleção", "ação", entre outras).
+
+As correções foram aplicadas exclusivamente em textos de exibição (front-end) em views, componentes e validações de serviços, garantindo que o código e a lógica interna permaneçam intactos.
