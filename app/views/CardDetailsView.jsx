@@ -14,7 +14,7 @@ import SellerBadge from "../components/SellerBadge";
 import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AnuncioService } from "../services/AnuncioService";
 import { CartService } from "../services/CartService";
-import { FavoritesService } from "../services/FavoritesService";
+import { MyCardsService } from "../services/MyCardsService";
 import { PokemonService } from "../services/PokemonService";
 import { useAppTheme } from "../services/AppThemeContext";
 
@@ -42,13 +42,13 @@ function CardDetailsViewContent() {
   const colors = theme.colors;
   const cardId = Array.isArray(id) ? id[0] : id;
   const [produto, setProduto] = useState(null);
-  const [favorites, setFavorites] = useState([]);
+  const [myCards, setMyCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = FavoritesService.subscribe(setFavorites);
+    const unsubscribe = MyCardsService.subscribe(setMyCards);
     return unsubscribe;
   }, []);
 
@@ -83,8 +83,8 @@ function CardDetailsViewContent() {
   }, [cardId]);
 
   const saleListings = useMemo(
-    () => AnuncioService.getListingsForCardId(favorites, cardId),
-    [cardId, favorites]
+    () => AnuncioService.getListingsForCardId(myCards, cardId),
+    [cardId, myCards]
   );
 
   if (loading) {

@@ -21,6 +21,7 @@ const badgeOptions = [
   "Vendedor",
   "Deck builder",
   "Trocas",
+  "Leilao",
   "Arte favorita",
   "Competitivo",
 ];

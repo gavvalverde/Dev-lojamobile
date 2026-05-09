@@ -15,6 +15,7 @@ import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AnuncioService } from "../services/AnuncioService";
 import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
+import { MyCardsService } from "../services/MyCardsService";
 import { PokemonService } from "../services/PokemonService";
 import { useAppTheme } from "../services/AppThemeContext";
 
@@ -36,7 +37,8 @@ export default function HomeView() {
   const cardWidth = (width - spacing * (numColumns + 1)) / numColumns;
   const cardHeight = cardWidth / 0.716;
 
-  const [favorites, setFavorites] = useState([]);
+  const [, setFavorites] = useState([]);
+  const [myCards, setMyCards] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [search, setSearch] = useState("");
   const [apiCards, setApiCards] = useState([]);
@@ -46,10 +48,12 @@ export default function HomeView() {
 
   useEffect(() => {
     const unsubscribeFavorites = FavoritesService.subscribe(setFavorites);
+    const unsubscribeMyCards = MyCardsService.subscribe(setMyCards);
     const unsubscribeCart = CartService.subscribe(setCartItems);
 
     return () => {
       unsubscribeFavorites();
+      unsubscribeMyCards();
       unsubscribeCart();
     };
   }, []);
@@ -91,11 +95,11 @@ export default function HomeView() {
 
   const cardResults = useMemo(() => {
     if (search.trim()) {
-      return AnuncioService.buildSearchResults(apiCards, favorites);
+      return AnuncioService.buildSearchResults(apiCards, myCards);
     }
 
-    return AnuncioService.buildCatalogResults(favorites);
-  }, [apiCards, favorites, search]);
+    return AnuncioService.buildCatalogResults(myCards);
+  }, [apiCards, myCards, search]);
 
   const cartTotal = CartService.getTotal(cartItems);
   const cartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -112,7 +116,9 @@ export default function HomeView() {
       cardHeight={cardHeight}
       formatCardCode={formatCardCode}
       isFavorite={FavoritesService.isFavorite(item.card.id)}
+      isMyCard={MyCardsService.isMyCard(item.card.id)}
       onFavoritePress={(card) => FavoritesService.toggleFavorite(card)}
+      onMyCardPress={(card) => MyCardsService.toggleCard(card)}
       onPress={(card) => router.push(`/views/CardDetailsView?id=${card.id}`)}
       onAddToCart={(anuncio) => CartService.addItem(anuncio)}
     />
@@ -190,15 +196,15 @@ export default function HomeView() {
             <Text style={[styles.emptyText, { color: colors.mutedText }]}>
               {search.trim()
                 ? "Tente buscar por outro nome de carta Pokemon TCG."
-                : "Va em Favoritos, toque em Editar e marque uma carta como item a venda."}
+                : "Va em Minhas Cartas, toque em Editar e marque uma carta como item a venda."}
             </Text>
             {!search.trim() && (
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => router.push("/views/FavoritesView")}
+                onPress={() => router.push("/views/MyCardsView")}
                 style={[styles.emptyButton, { backgroundColor: colors.primary }]}
               >
-                <Text style={styles.emptyButtonText}>Abrir favoritos</Text>
+                <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
               </TouchableOpacity>
             )}
           </View>

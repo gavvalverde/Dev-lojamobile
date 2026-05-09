@@ -15,6 +15,9 @@ import { AuthService } from "../services/AuthService";
 const menuItems = [
   { label: "Catálogo TCG", path: "/views/HomeView" },
   { label: "Favoritos", path: "/views/FavoritesView" },
+  { label: "Minhas Cartas", path: "/views/MyCardsView" },
+  { label: "Leiloes", path: "/views/AuctionView" },
+  { label: "Usuarios", path: "/views/UsersManagementView" },
 ];
 
 export default function TopDropDownMenu({ title = "Yellow Duck TCG" }) {

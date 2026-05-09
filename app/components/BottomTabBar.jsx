@@ -6,6 +6,8 @@ const ICON_MAP = {
   "views/ProfileView": "account",
   "views/HomeView": "home",
   "views/FavoritesView": "heart",
+  "views/MyCardsView": "cards",
+  "views/AuctionView": "gavel",
 };
 
 export default function BottomTabBar({ state, descriptors, navigation }) {
@@ -13,12 +15,14 @@ export default function BottomTabBar({ state, descriptors, navigation }) {
   const colors = theme.colors;
   const visibleTabs = [
     "views/ProfileView",
-    "views/HomeView",
     "views/FavoritesView",
+    "views/HomeView",
+    "views/MyCardsView",
+    "views/AuctionView",
   ];
-  const filteredRoutes = state.routes.filter((route) =>
-    visibleTabs.includes(route.name)
-  );
+  const filteredRoutes = visibleTabs
+    .map((name) => state.routes.find((route) => route.name === name))
+    .filter(Boolean);
 
   return (
     <View

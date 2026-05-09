@@ -16,7 +16,9 @@ export function AnimatedCard({
   cardHeight,
   onPress,
   onFavoritePress,
+  onMyCardPress,
   isFavorite = false,
+  isMyCard = false,
   formatCardCode,
 }) {
   const { theme } = useAppTheme();
@@ -58,28 +60,53 @@ export function AnimatedCard({
           style={[styles.image, { height: cardHeight }]}
         />
 
-        <TouchableOpacity
-          style={[
-            styles.favoriteButton,
-            { backgroundColor: colors.surface },
-            isFavorite && { backgroundColor: colors.primary },
-          ]}
-          activeOpacity={0.85}
-          onPress={(event) => {
-            event.stopPropagation();
-            onFavoritePress?.();
-          }}
-        >
-          <Text
+        <View style={styles.actionStack}>
+          <TouchableOpacity
             style={[
-              styles.favoriteText,
-              { color: colors.primary },
-              isFavorite && styles.favoriteTextActive,
+              styles.actionButton,
+              { backgroundColor: colors.surface },
+              isFavorite && { backgroundColor: colors.primary },
             ]}
+            activeOpacity={0.85}
+            onPress={(event) => {
+              event.stopPropagation();
+              onFavoritePress?.();
+            }}
           >
-            {isFavorite ? "Salvo" : "Fav"}
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.actionText,
+                { color: colors.primary },
+                isFavorite && styles.actionTextActive,
+              ]}
+            >
+              {isFavorite ? "Favorito" : "Fav"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: colors.surface },
+              isMyCard && { backgroundColor: colors.accent },
+            ]}
+            activeOpacity={0.85}
+            onPress={(event) => {
+              event.stopPropagation();
+              onMyCardPress?.();
+            }}
+          >
+            <Text
+              style={[
+                styles.actionText,
+                { color: colors.secondary },
+                isMyCard && { color: colors.onAccent },
+              ]}
+            >
+              {isMyCard ? "Minha" : "Minhas"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.cardInfo}>
           <Text numberOfLines={1} style={[styles.cardName, { color: colors.text }]}>
@@ -102,21 +129,24 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   image: { width: "100%" },
-  favoriteButton: {
+  actionStack: {
     position: "absolute",
     top: 8,
     right: 8,
-    minWidth: 48,
+    gap: 6,
+  },
+  actionButton: {
+    minWidth: 64,
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 999,
     alignItems: "center",
   },
-  favoriteText: {
+  actionText: {
     fontSize: 11,
     fontWeight: "700",
   },
-  favoriteTextActive: {
+  actionTextActive: {
     color: "#fff",
   },
   cardInfo: { padding: 8 },

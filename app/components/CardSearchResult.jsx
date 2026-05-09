@@ -17,7 +17,9 @@ export function CardSearchResult({
   cardHeight,
   formatCardCode,
   isFavorite,
+  isMyCard,
   onFavoritePress,
+  onMyCardPress,
   onPress,
   onAddToCart,
 }) {
@@ -34,7 +36,9 @@ export function CardSearchResult({
         cardHeight={cardHeight}
         formatCardCode={formatCardCode}
         isFavorite={isFavorite}
+        isMyCard={isMyCard}
         onFavoritePress={() => onFavoritePress(card)}
+        onMyCardPress={() => onMyCardPress(card)}
         onPress={() => onPress(card)}
       />
 

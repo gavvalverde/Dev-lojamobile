@@ -15,6 +15,7 @@ import ProfileEditModal from "../components/ProfileEditModal";
 import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AuthService } from "../services/AuthService";
 import { FavoritesService } from "../services/FavoritesService";
+import { MyCardsService } from "../services/MyCardsService";
 import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
 
@@ -38,27 +39,31 @@ export default function ProfileView() {
   const colors = theme.colors;
   const [user, setUser] = useState(null);
   const [favorites, setFavorites] = useState([]);
+  const [myCards, setMyCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
 
   useEffect(() => {
     const unsubscribeAuth = AuthService.subscribe(setUser);
     const unsubscribeFavorites = FavoritesService.subscribe(setFavorites);
+    const unsubscribeMyCards = MyCardsService.subscribe(setMyCards);
 
     return () => {
       unsubscribeAuth();
       unsubscribeFavorites();
+      unsubscribeMyCards();
     };
   }, []);
 
   const profileStats = useMemo(() => {
-    const saleCount = favorites.filter((item) => item.aVenda).length;
+    const saleCount = myCards.filter((item) => item.aVenda).length;
     return [
       { label: "Favoritas", value: favorites.length },
+      { label: "Minhas", value: myCards.length },
       { label: "A venda", value: saleCount },
       { label: "Insignias", value: user?.badges?.length ?? 0 },
     ];
-  }, [favorites, user?.badges?.length]);
+  }, [favorites.length, myCards, user?.badges?.length]);
 
   const handleEditProfile = async (updates) => {
     try {
@@ -66,6 +71,7 @@ export default function ProfileView() {
       const updatedUser = await UserService.updateProfile(user.id, updates);
       AuthService.setCurrentUser(updatedUser);
       FavoritesService.updateSellerProfile(updatedUser);
+      MyCardsService.updateSellerProfile(updatedUser);
       setUser(updatedUser);
       setEditModalVisible(false);
       Alert.alert("Perfil salvo", "Suas alteracoes ja aparecem no perfil.");

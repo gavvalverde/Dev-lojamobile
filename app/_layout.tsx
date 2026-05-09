@@ -15,8 +15,11 @@ export default function RootLayout() {
           tabBar={(props) => <BottomTabBar {...props} />}
         >
           <Tabs.Screen name="views/ProfileView" />
-          <Tabs.Screen name="views/HomeView" />
           <Tabs.Screen name="views/FavoritesView" />
+          <Tabs.Screen name="views/HomeView" />
+          <Tabs.Screen name="views/MyCardsView" />
+          <Tabs.Screen name="views/AuctionView" />
+          <Tabs.Screen name="views/UsersManagementView" />
         </Tabs>
       </AuthGuard>
     </AppThemeProvider>
