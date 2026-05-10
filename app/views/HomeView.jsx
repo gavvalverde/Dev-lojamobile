@@ -132,6 +132,7 @@ export default function HomeView() {
       }}
       onPress={(card) => router.push(`/views/CardDetailsView?id=${card.id}`)}
       onAddToCart={(anuncio) => CartService.addItem(anuncio)}
+      catalogView={!search.trim()}
     />
   );
 

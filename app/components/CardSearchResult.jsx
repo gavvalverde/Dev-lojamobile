@@ -23,6 +23,7 @@ export function CardSearchResult({
   onMyCardPress,
   onPress,
   onAddToCart,
+  catalogView = false,
 }) {
   const { card, anuncios } = result;
   const { theme } = useAppTheme();
@@ -41,6 +42,9 @@ export function CardSearchResult({
         myCardQuantity={myCardQuantity}
         onFavoritePress={() => onFavoritePress(card)}
         onMyCardPress={() => onMyCardPress(card)}
+        favoriteDisabled={catalogView}
+        hideAddButton={catalogView}
+        showMyCardQuantity={!catalogView}
         onPress={() => onPress(card)}
       />
 
@@ -56,15 +60,20 @@ export function CardSearchResult({
                 <Text numberOfLines={1} style={[styles.meta, { color: colors.mutedText }]}>
                   {anuncio.idioma} - {anuncio.qualidade}
                 </Text>
+                <Text style={[styles.quantityOnSale, { color: colors.mutedText }]}>
+                  {String(anuncio.quantity ?? anuncio.qtd ?? 1)} à venda
+                </Text>
               </View>
 
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => onAddToCart(anuncio)}
-                style={[styles.buyButton, { backgroundColor: colors.primary }]}
-              >
-                <Text style={styles.buyButtonText}>Adicionar</Text>
-              </TouchableOpacity>
+              {!catalogView && (
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => onAddToCart(anuncio)}
+                  style={[styles.buyButton, { backgroundColor: colors.primary }]}
+                >
+                  <Text style={styles.buyButtonText}>Adicionar</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ))
         ) : (
@@ -114,5 +123,9 @@ const styles = StyleSheet.create({
     minHeight: 42,
     textAlign: "center",
     textAlignVertical: "center",
+  },
+  quantityOnSale: {
+    fontSize: 12,
+    marginTop: 4,
   },
 });

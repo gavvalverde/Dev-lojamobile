@@ -28,6 +28,9 @@ export function AnimatedCard({
   isMyCard = false,
   myCardQuantity = 0,
   formatCardCode,
+  favoriteDisabled = false,
+  hideAddButton = false,
+  showMyCardQuantity = true,
 }) {
   const { theme } = useAppTheme();
   const colors = theme.colors;
@@ -76,7 +79,7 @@ export function AnimatedCard({
           />
         </View>
 
-        {myCardQuantity > 1 && (
+        {showMyCardQuantity && myCardQuantity > 1 && (
           <View style={[styles.quantityBadge, { backgroundColor: colors.primary }]}>
             <Text style={styles.quantityBadgeText}>{myCardQuantity}x</Text>
           </View>
@@ -85,10 +88,10 @@ export function AnimatedCard({
         <View style={styles.actionStack}>
           <TouchableOpacity
             style={styles.iconButton}
-            activeOpacity={0.85}
+            activeOpacity={favoriteDisabled ? 1 : 0.85}
             onPress={(event) => {
               event.stopPropagation();
-              onFavoritePress?.();
+              if (!favoriteDisabled) onFavoritePress?.();
             }}
           >
             <Image
@@ -97,19 +100,21 @@ export function AnimatedCard({
             />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.iconButton}
-            activeOpacity={0.85}
-            onPress={(event) => {
-              event.stopPropagation();
-              onMyCardPress?.();
-            }}
-          >
-            <Image
-              source={isMyCard ? addB : addA}
-              style={styles.iconImage}
-            />
-          </TouchableOpacity>
+          {!hideAddButton && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              activeOpacity={0.85}
+              onPress={(event) => {
+                event.stopPropagation();
+                onMyCardPress?.();
+              }}
+            >
+              <Image
+                source={isMyCard ? addB : addA}
+                style={styles.iconImage}
+              />
+            </TouchableOpacity>
+          )}
 
           {isMyCard && onMyCardRemovePress && (
             <TouchableOpacity
