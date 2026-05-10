@@ -5,6 +5,8 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +16,7 @@ import {
 } from "react-native";
 import { useAppTheme } from "../services/AppThemeContext";
 import { UserService } from "../services/UserService";
+import { getProfileAvatarOptions, getProfilePhotoSource } from "../utils/profilePhoto";
 
 const colorOptions = ["#ffc94a", "#039be5", "#06243a", "#ffffff", "#ff8f3d"];
 const badgeOptions = [
@@ -54,6 +57,7 @@ function isValidHexColor(value) {
 export default function ProfileEditModal({ user, onSave, onCancel }) {
   const { theme } = useAppTheme();
   const colors = theme.colors;
+  const avatarOptions = getProfileAvatarOptions();
   const [form, setForm] = useState({
     name: user?.name || "",
     handle: user?.handle || "",
@@ -69,6 +73,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
     badges: user?.badges || [],
   });
   const [loading, setLoading] = useState(false);
+  const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
   const [customColor, setCustomColor] = useState(user?.themeColor || "#ffc94a");
   const [customBadge, setCustomBadge] = useState("");
 
@@ -95,6 +100,16 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openExternalPhotoPicker = async () => {
+    setAvatarPickerVisible(false);
+    await pickImage("photo", [1, 1]);
+  };
+
+  const selectAvatar = (avatarId) => {
+    updateField("photo", avatarId);
+    setAvatarPickerVisible(false);
   };
 
   const toggleBadge = (badge) => {
@@ -224,17 +239,26 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
           <View style={styles.previewBody}>
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => pickImage("photo", [1, 1])}
+              onPress={() => setAvatarPickerVisible(true)}
               style={[
                 styles.avatar,
                 { backgroundColor: colors.surfaceVariant, borderColor: form.themeColor },
               ]}
             >
-              {form.photo ? (
-                <Image source={{ uri: form.photo }} style={styles.avatarImage} />
+              {getProfilePhotoSource(form.photo) ? (
+                <Image source={getProfilePhotoSource(form.photo)} style={styles.avatarImage} />
               ) : (
                 <MaterialCommunityIcons name="account" size={46} color={colors.mutedText} />
               )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.75}
+              onPress={() => setAvatarPickerVisible(true)}
+              style={styles.avatarActionLink}
+            >
+              <MaterialCommunityIcons name="image-album" size={16} color={colors.mutedText} />
+              <Text style={[styles.avatarActionText, { color: colors.mutedText }]}>Escolher avatar</Text>
             </TouchableOpacity>
 
             <Text style={[styles.namePreview, { color: colors.text }]}>{form.name || "Seu nome"}</Text>
@@ -426,6 +450,84 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
           />
         </View>
       </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={avatarPickerVisible}
+        onRequestClose={() => setAvatarPickerVisible(false)}
+      >
+        <Pressable onPress={() => setAvatarPickerVisible(false)} style={styles.avatarPickerOverlay}>
+          <Pressable style={[styles.avatarPickerSheet, { backgroundColor: colors.surface }]}>
+            <View style={styles.avatarPickerHeader}>
+              <Text style={[styles.avatarPickerTitle, { color: colors.text }]}>Escolha seu avatar</Text>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setAvatarPickerVisible(false)}
+                style={styles.avatarPickerClose}
+              >
+                <MaterialCommunityIcons name="close" size={22} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.avatarPickerSubtitle, { color: colors.mutedText }]}>Avatares padrão</Text>
+            <ScrollView contentContainerStyle={styles.avatarGrid} showsVerticalScrollIndicator={false}>
+              {avatarOptions.map((avatar) => {
+                const selected = form.photo === avatar.id;
+
+                return (
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    key={avatar.id}
+                    onPress={() => selectAvatar(avatar.id)}
+                    style={[
+                      styles.avatarOption,
+                      { borderColor: colors.border },
+                      selected && { borderColor: form.themeColor },
+                    ]}
+                  >
+                    <Image source={avatar.source} style={styles.avatarOptionImage} />
+                    <View style={[styles.avatarOptionLabelWrap, { backgroundColor: colors.background }]}>
+                      <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>{avatar.label}</Text>
+                    </View>
+                    {selected && (
+                      <View style={[styles.avatarSelectedBadge, { backgroundColor: form.themeColor }]}>
+                        <MaterialCommunityIcons name="check" size={14} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <View style={styles.avatarPickerActions}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={openExternalPhotoPicker}
+                style={[styles.avatarPickerButton, { backgroundColor: colors.accent }]}
+              >
+                <MaterialCommunityIcons name="image-plus" size={18} color={colors.onAccent} />
+                <Text style={[styles.avatarPickerButtonText, { color: colors.onAccent }]}>Enviar foto externa</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => {
+                  updateField("photo", null);
+                  setAvatarPickerVisible(false);
+                }}
+                style={[
+                  styles.avatarPickerButton,
+                  styles.avatarPickerSecondary,
+                  { borderColor: colors.border },
+                ]}
+              >
+                <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.text} />
+                <Text style={[styles.avatarPickerButtonText, { color: colors.text }]}>Remover foto</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -532,6 +634,16 @@ const styles = StyleSheet.create({
   avatarImage: {
     height: "100%",
     width: "100%",
+  },
+  avatarActionLink: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 10,
+  },
+  avatarActionText: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   namePreview: {
     fontSize: 22,
@@ -663,5 +775,97 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 13,
     fontWeight: "800",
+  },
+  avatarPickerOverlay: {
+    backgroundColor: "rgba(0,0,0,0.6)",
+    flex: 1,
+    justifyContent: "flex-end",
+    padding: 14,
+  },
+  avatarPickerSheet: {
+    borderRadius: 22,
+    maxHeight: "88%",
+    overflow: "hidden",
+    padding: 16,
+  },
+  avatarPickerHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 6,
+  },
+  avatarPickerTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "900",
+  },
+  avatarPickerClose: {
+    alignItems: "center",
+    borderRadius: 999,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  avatarPickerSubtitle: {
+    fontSize: 12,
+    fontWeight: "800",
+    marginBottom: 10,
+    textTransform: "uppercase",
+  },
+  avatarGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    paddingBottom: 14,
+  },
+  avatarOption: {
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: "hidden",
+    position: "relative",
+    width: "31%",
+  },
+  avatarOptionImage: {
+    aspectRatio: 1,
+    width: "100%",
+  },
+  avatarOptionLabelWrap: {
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+  },
+  avatarOptionLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  avatarSelectedBadge: {
+    alignItems: "center",
+    borderRadius: 999,
+    height: 24,
+    justifyContent: "center",
+    position: "absolute",
+    right: 8,
+    top: 8,
+    width: 24,
+  },
+  avatarPickerActions: {
+    gap: 10,
+    paddingTop: 4,
+  },
+  avatarPickerButton: {
+    alignItems: "center",
+    borderRadius: 14,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 14,
+  },
+  avatarPickerSecondary: {
+    borderWidth: 1,
+  },
+  avatarPickerButtonText: {
+    fontSize: 14,
+    fontWeight: "900",
   },
 });

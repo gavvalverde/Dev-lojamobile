@@ -18,6 +18,7 @@ import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
+import { getProfilePhotoSource } from "../utils/profilePhoto";
 
 function getInitials(name) {
   return String(name ?? "")
@@ -117,6 +118,7 @@ export default function ProfileView() {
 
   const themeColor = user.themeColor || "#ffc94a";
   const badges = user.badges?.length ? user.badges : ["Novo perfil"];
+  const profilePhotoSource = getProfilePhotoSource(user.photo);
 
   return (
     <>
@@ -141,8 +143,8 @@ export default function ProfileView() {
 
             <View style={styles.profileBody}>
               <View style={[styles.avatar, { borderColor: themeColor }]}>
-                {user.photo ? (
-                  <Image source={{ uri: user.photo }} style={styles.avatarImage} />
+                {profilePhotoSource ? (
+                  <Image source={profilePhotoSource} style={styles.avatarImage} />
                 ) : (
                   <Text style={styles.avatarText}>{getInitials(user.name) || "YD"}</Text>
                 )}

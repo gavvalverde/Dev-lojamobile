@@ -1,5 +1,6 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import { useAppTheme } from "../services/AppThemeContext";
+import { getProfilePhotoSource } from "../utils/profilePhoto";
 
 function getInitials(name) {
   return String(name ?? "YD")
@@ -23,6 +24,7 @@ export default function SellerBadge({ seller, compact = false }) {
   const avatarSize = compact ? 28 : 36;
   const sellerName = getSellerName(seller);
   const avatarColor = seller?.themeColor || colors.accent;
+  const sellerPhotoSource = getProfilePhotoSource(seller?.photo);
 
   return (
     <View style={styles.container}>
@@ -37,8 +39,8 @@ export default function SellerBadge({ seller, compact = false }) {
           },
         ]}
       >
-        {seller?.photo ? (
-          <Image source={{ uri: seller.photo }} style={styles.avatarImage} />
+        {sellerPhotoSource ? (
+          <Image source={sellerPhotoSource} style={styles.avatarImage} />
         ) : (
           <Text style={[styles.avatarText, { color: colors.onAccent }]}>
             {getInitials(sellerName)}
