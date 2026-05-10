@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     useWindowDimensions,
     View,
+    Image,
 } from "react-native";
 import { CardSearchResult } from "../components/CardSearchResult";
 import { CartModal } from "../components/CartModal";
@@ -192,7 +193,13 @@ export default function HomeView() {
               {search.trim() ? "Cartas encontradas" : "Cartas à venda"}
             </Text>
             {searchLoading && (
-              <Text style={[styles.searchStatus, { color: colors.mutedText }]}>Buscando na API...</Text>
+              <View style={styles.loadingContainer}>
+                <Image
+                  source={require('../../assets/images/backgrounds/load.gif')}
+                  style={styles.loadingGif}
+                />
+                <Text style={[styles.searchStatus, { color: colors.mutedText }]}>Buscando na API...</Text>
+              </View>
             )}
             {!!searchError && (
               <Text style={[styles.searchError, { color: colors.danger }]}>{searchError}</Text>
@@ -200,25 +207,27 @@ export default function HomeView() {
           </View>
         }
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta à venda"}
-            </Text>
-            <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-              {search.trim()
-                ? "Tente buscar por outro nome de carta Pokemon TCG."
-                : "Vá em Minhas Cartas, toque em Editar e marque uma carta como item à venda."}
-            </Text>
-            {!search.trim() && (
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => router.push("/views/MyCardsView")}
-                style={[styles.emptyButton, { backgroundColor: colors.primary }]}
-              >
-                <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          !searchLoading ? (
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta à venda"}
+              </Text>
+              <Text style={[styles.emptyText, { color: colors.mutedText }]}>
+                {search.trim()
+                  ? "Tente buscar por outro nome de carta Pokemon TCG."
+                  : "Vá em Minhas Cartas, toque em Editar e marque uma carta como item à venda."}
+              </Text>
+              {!search.trim() && (
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => router.push("/views/MyCardsView")}
+                  style={[styles.emptyButton, { backgroundColor: colors.primary }]}
+                >
+                  <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : null
         }
       />
 
@@ -278,6 +287,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft: 4,
     marginTop: 4,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  loadingGif: {
+    width: 200,
+    height: 200,
+    marginBottom: 8,
+    resizeMode: "contain",
   },
   searchError: {
     fontSize: 13,
