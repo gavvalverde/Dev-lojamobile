@@ -259,7 +259,7 @@ export function CardSearchResult({
                       idioma: editDraft.idioma,
                       qualidade: editDraft.qualidade,
                       aVenda: true,
-                      quantity: saleQuantity,
+                      quantidadeVenda: saleQuantity,
                     });
                   }
 

@@ -111,7 +111,12 @@ function MyCardsViewContent() {
       price: normalizeMoneyValue(item.price),
       idioma: item.idioma ?? "Português",
       qualidade: item.qualidade ?? "NM",
-      quantidadeVenda: String(Math.max(1, Math.min(currentQuantity, Number(item.quantity ?? item.quantidadeVenda) || 1))),
+      quantidadeVenda: String(
+        Math.max(
+          1,
+          Math.min(currentQuantity, Number(item.quantidadeVenda ?? item.quantity) || 1)
+        )
+      ),
     });
     setOpenDropdown(null);
   };
@@ -157,13 +162,13 @@ function MyCardsViewContent() {
         return;
       }
 
-      // Save as a sale: ensure aVenda is true and map quantidadeVenda -> quantity
+      // Save as a sale: ensure aVenda is true and set quantidadeVenda (do not overwrite owned quantity)
       MyCardsService.updateCard(editingItem.id, {
         price: draft.price,
         idioma: draft.idioma,
         qualidade: draft.qualidade,
         aVenda: true,
-        quantity: saleQuantity,
+        quantidadeVenda: saleQuantity,
       });
     }
     closeEditor();

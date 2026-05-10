@@ -56,6 +56,12 @@ function normalizeCard(card) {
     seller: card.seller ?? card.vendedor ?? (aVenda ? getCurrentSellerSnapshot() : null),
     minhaCarta: true,
     quantity: normalizeQuantity(card.quantity),
+    quantidadeVenda:
+      card.quantidadeVenda != null
+        ? normalizeQuantity(card.quantidadeVenda)
+        : aVenda && card.quantity != null
+        ? normalizeQuantity(card.quantity)
+        : 0,
   };
 }
 
@@ -222,12 +228,24 @@ export const MyCardsService = {
     const shouldAttachSeller = updates.aVenda === true;
     const seller = shouldAttachSeller ? getCurrentSellerSnapshot() : updates.seller;
 
+    // If update includes `quantity` while toggling to sale, treat it as `quantidadeVenda`
+    const patched = { ...updates };
+    if (patched.aVenda === true && patched.quantity != null) {
+      patched.quantidadeVenda = patched.quantity;
+      delete patched.quantity;
+    }
+
+    // If disabling sale, clear quantidadeVenda
+    if (patched.aVenda === false) {
+      patched.quantidadeVenda = 0;
+    }
+
     setCards(
       myCards.map((item) =>
         item.id === id
           ? normalizeCard({
               ...item,
-              ...updates,
+              ...patched,
               seller: seller ?? item.seller ?? null,
             })
           : item
