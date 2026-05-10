@@ -18,11 +18,6 @@ import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { useAppTheme } from "../services/AppThemeContext";
 
-const saleOptions = [
-  { label: "Sim", value: true },
-  { label: "Não", value: false },
-];
-
 const languageOptions = ["Português", "Inglês", "Japonês", "Espanhol", "Francês"];
 const qualityOptions = ["NM", "LP", "MP", "HP", "DMG"];
 
@@ -72,7 +67,6 @@ function MyCardsViewContent() {
   const cardWidth = (width - spacing * (numColumns + 1)) / numColumns;
   const cardHeight = cardWidth / 0.716;
   const ownedQuantity = editingItem ? MyCardsService.getQuantity(editingItem.id) : 0;
-  const saleLabel = draft?.aVenda ? "Sim" : "Não";
   const saleQuantityOptions = Array.from({ length: Math.max(1, ownedQuantity) }, (_, index) => {
     const quantity = index + 1;
     return { label: String(quantity), value: quantity };
@@ -96,7 +90,6 @@ function MyCardsViewContent() {
 
     setEditingItem(item);
     setDraft({
-      aVenda: item.aVenda ?? false,
       price: normalizeMoneyValue(item.price),
       idioma: item.idioma ?? "Português",
       qualidade: item.qualidade ?? "NM",
@@ -133,32 +126,21 @@ function MyCardsViewContent() {
 
   const saveEditor = () => {
     if (editingItem && draft) {
-      const saleQuantity = Number(String(draft.quantidadeVenda ?? "").replace(/\D/g, "")) || 0;
-
       // Validar preço
       const priceText = String(draft.price ?? "").replace(/\D/g, "");
-      if (draft.aVenda && (!priceText || priceText === "0")) {
+      if (!priceText || priceText === "0") {
         alert("Por favor, insira um preço válido");
         return;
       }
 
-      if (draft.aVenda) {
-        const maxQuantity = MyCardsService.getQuantity(editingItem.id);
-
-        if (saleQuantity < 1) {
-          alert("Informe uma quantidade disponível para venda");
-          return;
-        }
-
-        if (saleQuantity > maxQuantity) {
-          alert(`A quantidade para venda não pode ser maior que ${maxQuantity}`);
-          return;
-        }
+      const saleQuantity = Number(String(draft.quantidadeVenda ?? "").replace(/\D/g, "")) || 0;
+      if (saleQuantity < 1) {
+        alert("Informe uma quantidade disponível para venda");
+        return;
       }
 
       MyCardsService.updateCard(editingItem.id, {
         ...draft,
-        quantidadeVenda: draft.aVenda ? saleQuantity : 0,
       });
     }
     closeEditor();
@@ -232,12 +214,13 @@ function MyCardsViewContent() {
         activeOpacity={0.85}
         onPress={() => openEditor(item)}
       >
-        <Text style={styles.editButtonText}>Vender</Text>
+        <Text style={styles.editButtonText}>Editar</Text>
       </TouchableOpacity>
     </View>
   );
 
-  const aVendaDropdown = draft ? renderDropdown("aVenda", "Item à venda", saleLabel, saleOptions) : null;
+  const idiomaDropdown = draft ? renderDropdown("idioma", "Idioma", draft.idioma, languageOptions) : null;
+  const qualidadeDropdown = draft ? renderDropdown("qualidade", "Qualidade", draft.qualidade, qualityOptions) : null;
   const quantidadeVendaDropdown = draft
     ? renderDropdown(
         "quantidadeVenda",
@@ -246,8 +229,6 @@ function MyCardsViewContent() {
         saleQuantityOptions
       )
     : null;
-  const idiomaDropdown = draft ? renderDropdown("idioma", "Idioma", draft.idioma, languageOptions) : null;
-  const qualidadeDropdown = draft ? renderDropdown("qualidade", "Qualidade", draft.qualidade, qualityOptions) : null;
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
@@ -292,18 +273,10 @@ function MyCardsViewContent() {
             style={[styles.modalCard, { backgroundColor: colors.surface }]}
             onPress={(event) => event.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Vender Carta</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Editar Carta</Text>
             <Text numberOfLines={1} style={[styles.modalSubtitle, { color: colors.mutedText }]}>
               {editingItem?.name}
             </Text>
-            {aVendaDropdown}
-
-            {draft?.aVenda && (
-              <>
-                {quantidadeVendaDropdown}
-                <Text style={[styles.removeHint, { color: colors.mutedText }]}>Você possui {ownedQuantity} unidade(s) na coleção.</Text>
-              </>
-            )}
 
             <View style={styles.field}>
               <Text style={[styles.inputLabel, { color: colors.mutedText }]}>Preço</Text>
@@ -328,6 +301,8 @@ function MyCardsViewContent() {
                 ]}
               />
             </View>
+
+            {quantidadeVendaDropdown}
 
             {idiomaDropdown}
 
