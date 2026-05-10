@@ -16,6 +16,7 @@ const menuItems = [
   { label: "Catálogo TCG", path: "/views/HomeView" },
   { label: "Favoritos", path: "/views/FavoritesView" },
   { label: "Minhas Cartas", path: "/views/MyCardsView" },
+  { label: "Mensagens", path: "/views/ChatsView" },
   { label: "Leilões", path: "/views/AuctionView" },
   { label: "Usuários", path: "/views/UsersManagementView" },
 ];

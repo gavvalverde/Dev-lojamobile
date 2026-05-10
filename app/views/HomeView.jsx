@@ -149,6 +149,17 @@ export default function HomeView() {
         </TouchableOpacity>
       </View>
 
+      {/* Botão rápido para abrir conversas - integrado na página principal */}
+      <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => router.push("/views/ChatsView")}
+          style={[styles.cartButton, { backgroundColor: colors.primary }]}
+        >
+          <Text style={styles.cartButtonText}>Conversas com vendedores</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         key={numColumns}
         data={cardResults}

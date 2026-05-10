@@ -8,6 +8,7 @@ const ICON_MAP = {
   "views/FavoritesView": "heart",
   "views/MyCardsView": "cards",
   "views/AuctionView": "gavel",
+  "views/ChatsView": "chat",
 };
 
 export default function BottomTabBar({ state, descriptors, navigation }) {
@@ -17,6 +18,7 @@ export default function BottomTabBar({ state, descriptors, navigation }) {
     "views/ProfileView",
     "views/FavoritesView",
     "views/HomeView",
+    "views/ChatsView",
     "views/MyCardsView",
     "views/AuctionView",
   ];
