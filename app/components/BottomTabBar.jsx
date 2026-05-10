@@ -14,6 +14,10 @@ const ICON_MAP = {
 export default function BottomTabBar({ state, descriptors, navigation }) {
   const { theme } = useAppTheme();
   const colors = theme.colors;
+  const activeRouteName = state.routes[state.index]?.name;
+
+  // Esconde o tab bar quando a rota ativa for a IndexView
+  if (activeRouteName === 'views/IndexView') return null;
   const visibleTabs = [
     "views/ProfileView",
     "views/FavoritesView",
