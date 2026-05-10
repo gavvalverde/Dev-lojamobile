@@ -10,6 +10,7 @@ export function AuthGuard({ children }) {
   const colors = theme.colors;
   const [user, setUser] = useState(AuthService.getCurrentUser());
   const [loading, setLoading] = useState(true);
+  const isPublicRoute = segments.length === 0 || segments[0] === "index";
   const isAuthRoute =
     segments[0] === "views" &&
     (segments[1] === "LoginView" || segments[1] === "RegisterView");
@@ -40,7 +41,7 @@ export function AuthGuard({ children }) {
   useEffect(() => {
     if (loading) return;
 
-    if (!user && !isAuthRoute) {
+    if (!user && !isAuthRoute && !isPublicRoute) {
       router.replace("/views/LoginView");
       return;
     }
@@ -48,7 +49,7 @@ export function AuthGuard({ children }) {
     if (user && isAuthRoute) {
       router.replace("/views/HomeView");
     }
-  }, [isAuthRoute, loading, user]);
+  }, [isAuthRoute, isPublicRoute, loading, user]);
 
   if (loading) {
     return (
@@ -59,7 +60,7 @@ export function AuthGuard({ children }) {
     );
   }
 
-  if (!user && !isAuthRoute) return null;
+  if (!user && !isAuthRoute && !isPublicRoute) return null;
 
   return children;
 }

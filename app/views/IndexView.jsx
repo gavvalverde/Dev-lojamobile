@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, ImageBackground, Image, Text, TouchableOpacity, Animated, StyleSheet, useWindowDimensions } from 'react-native';
+import { router } from 'expo-router';
+import { AuthService } from '../services/AuthService';
 
 const IndexView = () => {
   const { width, height } = useWindowDimensions();
@@ -21,7 +23,17 @@ const IndexView = () => {
         useNativeDriver: true,
       }),
     ]).start();
-    // Adicione sua lógica aqui
+
+    const currentUser = AuthService.getCurrentUser();
+
+    if (currentUser) {
+      router.replace('/views/HomeView');
+      return;
+    }
+
+    void AuthService.loadSession().then((sessionUser) => {
+      router.replace(sessionUser ? '/views/HomeView' : '/views/LoginView');
+    });
   };
 
   // Função que executa a animação de "shake" (pequeno balanço horizontal)
@@ -117,8 +129,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#ffffff',
     textAlign: 'left',
-    textShadowColor: '#000000',
-    textShadowOffset: { width: 2, height: 2 },
+    textShadowColor: '#ffffff',
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   // Botão transparente com animação de escala

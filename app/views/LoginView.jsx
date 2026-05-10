@@ -20,7 +20,7 @@ export default function LoginView() {
       setLoading(true);
       setError("");
       await AuthService.login(values);
-      router.replace("/");
+      router.replace("/views/HomeView");
     } catch (e) {
       setError(e.message);
     } finally {

@@ -25,7 +25,7 @@ export default function RegisterView() {
       setLoading(true);
       setError("");
       await AuthService.register(values);
-      router.replace("/");
+      router.replace("/views/HomeView");
     } catch (e) {
       setError(e.message);
     } finally {

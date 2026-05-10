@@ -15,9 +15,10 @@ export default function BottomTabBar({ state, descriptors, navigation }) {
   const { theme } = useAppTheme();
   const colors = theme.colors;
   const activeRouteName = state.routes[state.index]?.name;
+  const hiddenRoutes = ["index", "views/IndexView", "views/LoginView", "views/RegisterView"];
 
-  // Esconde o tab bar quando a rota ativa for a IndexView
-  if (activeRouteName === 'views/IndexView') return null;
+  // Esconde o tab bar apenas nas telas públicas de entrada e autenticação
+  if (hiddenRoutes.includes(activeRouteName)) return null;
   const visibleTabs = [
     "views/ProfileView",
     "views/FavoritesView",
