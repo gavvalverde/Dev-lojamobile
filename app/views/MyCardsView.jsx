@@ -64,6 +64,8 @@ function MyCardsViewContent() {
   const [editingItem, setEditingItem] = useState(null);
   const [draft, setDraft] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [removingItem, setRemovingItem] = useState(null);
+  const [removeQuantity, setRemoveQuantity] = useState("1");
 
   const numColumns = Math.max(2, width > 900 ? 4 : width > 600 ? 3 : 2);
   const spacing = 12;
@@ -99,6 +101,26 @@ function MyCardsViewContent() {
     setEditingItem(null);
     setDraft(null);
     setOpenDropdown(null);
+  };
+
+  const openRemovePopup = (item) => {
+    setRemovingItem(item);
+    setRemoveQuantity("1");
+  };
+
+  const closeRemovePopup = () => {
+    setRemovingItem(null);
+    setRemoveQuantity("1");
+  };
+
+  const confirmRemove = () => {
+    if (!removingItem) return;
+
+    const quantity = MyCardsService.getQuantity(removingItem.id);
+    const amount = quantity > 1 ? Math.max(1, Math.min(quantity, Number(removeQuantity) || 1)) : 1;
+
+    MyCardsService.removeCopies(removingItem, amount);
+    closeRemovePopup();
   };
 
   const saveEditor = () => {
@@ -172,7 +194,8 @@ function MyCardsViewContent() {
         isMyCard={MyCardsService.isMyCard(item.id)}
         myCardQuantity={MyCardsService.getQuantity(item.id)}
         onFavoritePress={() => FavoritesService.toggleFavorite(item)}
-        onMyCardPress={() => MyCardsService.toggleCard(item)}
+        onMyCardPress={() => MyCardsService.addCopies(item, 1)}
+        onMyCardRemovePress={() => openRemovePopup(item)}
         onPress={() => router.push(`/views/CardDetailsView?id=${item.id}`)}
       />
 
@@ -285,6 +308,72 @@ function MyCardsViewContent() {
                 onPress={saveEditor}
               >
                 <Text style={styles.saveButtonText}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={!!removingItem}
+        onRequestClose={closeRemovePopup}
+      >
+        <Pressable style={styles.modalOverlay} onPress={closeRemovePopup}>
+          <Pressable
+            style={[styles.modalCard, { backgroundColor: colors.surface }]}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Remover carta</Text>
+            <Text numberOfLines={2} style={[styles.modalSubtitle, { color: colors.mutedText }]}>
+              {removingItem?.name}
+            </Text>
+
+            {removingItem && MyCardsService.getQuantity(removingItem.id) > 1 ? (
+              <View style={styles.field}>
+                <Text style={[styles.inputLabel, { color: colors.mutedText }]}>
+                  Quantas unidades deseja remover?
+                </Text>
+                <TextInput
+                  value={removeQuantity}
+                  onChangeText={(value) => setRemoveQuantity(String(value).replace(/\D/g, ""))}
+                  keyboardType="numeric"
+                  placeholder="1"
+                  placeholderTextColor={colors.mutedText}
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: colors.border,
+                      color: colors.text,
+                      backgroundColor: colors.surface,
+                    },
+                  ]}
+                />
+                <Text style={[styles.removeHint, { color: colors.mutedText }]}>
+                  Você tem {MyCardsService.getQuantity(removingItem.id)} unidades desta carta.
+                </Text>
+              </View>
+            ) : (
+              <Text style={[styles.removeMessage, { color: colors.mutedText }]}>
+                Quer remover esta carta da sua coleção?
+              </Text>
+            )}
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: colors.surfaceVariant }]}
+                activeOpacity={0.85}
+                onPress={closeRemovePopup}
+              >
+                <Text style={[styles.cancelButtonText, { color: colors.text }]}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.removeButton, { backgroundColor: colors.primary }]}
+                activeOpacity={0.85}
+                onPress={confirmRemove}
+              >
+                <Text style={styles.removeButtonText}>Remover</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -448,6 +537,20 @@ const styles = StyleSheet.create({
   saveButton: {
   },
   saveButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  removeMessage: {
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  removeHint: {
+    fontSize: 12,
+    marginTop: 6,
+  },
+  removeButton: {
+  },
+  removeButtonText: {
     color: "#fff",
     fontWeight: "700",
   },

@@ -13,6 +13,7 @@ const favA = require("../../assets/images/icons/favA.png");
 const favB = require("../../assets/images/icons/favB.png");
 const addA = require("../../assets/images/icons/addA.png");
 const addB = require("../../assets/images/icons/addB.png");
+const dellA = require("../../assets/images/icons/dellA.png");
 
 export function AnimatedCard({
   item,
@@ -22,6 +23,7 @@ export function AnimatedCard({
   onPress,
   onFavoritePress,
   onMyCardPress,
+  onMyCardRemovePress,
   isFavorite = false,
   isMyCard = false,
   myCardQuantity = 0,
@@ -108,6 +110,19 @@ export function AnimatedCard({
               style={styles.iconImage}
             />
           </TouchableOpacity>
+
+          {isMyCard && onMyCardRemovePress && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              activeOpacity={0.85}
+              onPress={(event) => {
+                event.stopPropagation();
+                onMyCardRemovePress?.();
+              }}
+            >
+              <Image source={dellA} style={styles.iconImage} />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.cardInfo}>

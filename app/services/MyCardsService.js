@@ -179,6 +179,28 @@ export const MyCardsService = {
     setCards([normalizeCard({ ...card, quantity: amount }), ...myCards]);
   },
 
+  removeCopies(card, quantity = 1) {
+    if (!card?.id) return;
+
+    const amount = normalizeQuantity(quantity);
+    const existingItem = myCards.find((item) => item.id === card.id);
+
+    if (!existingItem) return;
+
+    if (existingItem.quantity <= amount) {
+      setCards(myCards.filter((item) => item.id !== card.id));
+      return;
+    }
+
+    setCards(
+      myCards.map((item) =>
+        item.id === card.id
+          ? normalizeCard({ ...item, quantity: item.quantity - amount })
+          : item
+      )
+    );
+  },
+
   toggleCard(card) {
     const alreadyAdded = myCards.some((item) => item.id === card.id);
 
@@ -188,6 +210,12 @@ export const MyCardsService = {
     }
 
     setCards([normalizeCard(card), ...myCards]);
+  },
+
+  removeCard(card) {
+    if (!card?.id) return;
+
+    setCards(myCards.filter((item) => item.id !== card.id));
   },
 
   updateCard(id, updates) {
