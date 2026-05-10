@@ -9,6 +9,11 @@ import {
 } from "react-native";
 import { useAppTheme } from "../services/AppThemeContext";
 
+const favA = require("../../assets/images/icons/favA.png");
+const favB = require("../../assets/images/icons/favB.png");
+const addA = require("../../assets/images/icons/addA.png");
+const addB = require("../../assets/images/icons/addB.png");
+
 export function AnimatedCard({
   item,
   index,
@@ -62,10 +67,12 @@ export function AnimatedCard({
         activeOpacity={0.9}
         onPress={onPress}
       >
-        <Image
-          source={{ uri: item.images.small }}
-          style={[styles.image, { height: cardHeight }]}
-        />
+        <View style={{ backgroundColor: "#fff", width: cardWidth, height: cardHeight, justifyContent: "center", alignItems: "center" }}>
+          <Image
+            source={{ uri: item.images.small }}
+            style={{ width: "100%", height: "100%", resizeMode: "cover" }}
+          />
+        </View>
 
         {myCardQuantity > 1 && (
           <View style={[styles.quantityBadge, { backgroundColor: colors.primary }]}>
@@ -75,49 +82,31 @@ export function AnimatedCard({
 
         <View style={styles.actionStack}>
           <TouchableOpacity
-            style={[
-              styles.actionButton,
-              { backgroundColor: colors.surface },
-              isFavorite && { backgroundColor: colors.primary },
-            ]}
+            style={styles.iconButton}
             activeOpacity={0.85}
             onPress={(event) => {
               event.stopPropagation();
               onFavoritePress?.();
             }}
           >
-            <Text
-              style={[
-                styles.actionText,
-                { color: colors.primary },
-                isFavorite && styles.actionTextActive,
-              ]}
-            >
-              {isFavorite ? "Favorito" : "Fav"}
-            </Text>
+            <Image
+              source={isFavorite ? favB : favA}
+              style={styles.iconImage}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.actionButton,
-              { backgroundColor: colors.surface },
-              isMyCard && { backgroundColor: colors.accent },
-            ]}
+            style={styles.iconButton}
             activeOpacity={0.85}
             onPress={(event) => {
               event.stopPropagation();
               onMyCardPress?.();
             }}
           >
-            <Text
-              style={[
-                styles.actionText,
-                { color: colors.secondary },
-                isMyCard && { color: colors.onAccent },
-              ]}
-            >
-              {myCardLabel}
-            </Text>
+            <Image
+              source={isMyCard ? addB : addA}
+              style={styles.iconImage}
+            />
           </TouchableOpacity>
         </View>
 
@@ -161,19 +150,20 @@ const styles = StyleSheet.create({
     right: 8,
     gap: 6,
   },
-  actionButton: {
-    minWidth: 64,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 999,
+  iconButton: {
+    width: 40,
+    height: 40,
     alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.9)",
+
+
   },
-  actionText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  actionTextActive: {
-    color: "#fff",
+  iconImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
   },
   cardInfo: { padding: 8 },
   cardName: { fontSize: 13, fontWeight: "600" },
