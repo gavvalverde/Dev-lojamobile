@@ -1,9 +1,11 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
     Image,
     ScrollView,
+  Alert,
+  Modal,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -16,6 +18,7 @@ import { AnuncioService } from "../services/AnuncioService";
 import { CartService } from "../services/CartService";
 import { MyCardsService } from "../services/MyCardsService";
 import { PokemonService } from "../services/PokemonService";
+import { ChatService } from "../services/ChatService";
 import { useAppTheme } from "../services/AppThemeContext";
 
 function formatCurrency(value) {
@@ -38,6 +41,7 @@ function parsePrice(value) {
 
 function CardDetailsViewContent() {
   const { id } = useLocalSearchParams();
+  const router = useRouter();
   const { theme } = useAppTheme();
   const colors = theme.colors;
   const cardId = Array.isArray(id) ? id[0] : id;
@@ -46,6 +50,8 @@ function CardDetailsViewContent() {
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAddedModal, setShowAddedModal] = useState(false);
+  const [modalListing, setModalListing] = useState(null);
 
   useEffect(() => {
     const unsubscribe = MyCardsService.subscribe(setMyCards);
@@ -86,6 +92,30 @@ function CardDetailsViewContent() {
     () => AnuncioService.getListingsForCardId(myCards, cardId),
     [cardId, myCards]
   );
+
+  function resolveSellerName(seller) {
+    if (seller?.name) return seller.name;
+    if (seller?.handle) return `@${seller.handle}`;
+    return "Vendedor";
+  }
+
+  function handleTalk(listing) {
+    const sellerName = resolveSellerName(listing.seller);
+    const existing = ChatService.getAll().find((c) => c.seller === sellerName);
+    const chat = existing || ChatService.createChat(sellerName);
+
+    // adiciona a mensagem padrão e abre a tela de chat
+    const initial = "Olá essa carta ainda esta disponivel. Tenho interesse.";
+    ChatService.addMessage(chat.id, { from: "user", text: initial });
+
+    router.push(`/views/ChatDetailView?id=${chat.id}`);
+  }
+
+  function handleAdd(listing) {
+    CartService.addItem(listing);
+    setModalListing(listing);
+    setShowAddedModal(true);
+  }
 
   if (loading) {
     return (
@@ -152,13 +182,23 @@ function CardDetailsViewContent() {
                   </Text>
                 </View>
 
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  onPress={() => CartService.addItem(listing)}
-                  style={[styles.buyButton, { backgroundColor: colors.primary }]}
-                >
-                  <Text style={styles.buyButtonText}>Adicionar</Text>
-                </TouchableOpacity>
+                <View style={styles.buttonsContainer}>
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={() => handleAdd(listing)}
+                    style={[styles.buyButton, { backgroundColor: colors.primary }]}
+                  >
+                    <Text style={styles.buyButtonText}>Adicionar</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={() => handleTalk(listing)}
+                    style={[styles.talkButton, { borderColor: colors.primary }]}
+                  >
+                    <Text style={[styles.talkButtonText, { color: colors.primary }]}>Falar com vendedor</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             ))
           ) : (
@@ -170,6 +210,21 @@ function CardDetailsViewContent() {
           )}
         </View>
       </ScrollView>
+
+      <Modal visible={showAddedModal} transparent animationType="fade" onRequestClose={() => setShowAddedModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Adicionado ao carrinho</Text>
+            <Text style={[styles.modalMessage, { color: colors.mutedText }]}>Produto adicionado ao carrinho com sucesso.</Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.modalButton, { backgroundColor: colors.border }]} onPress={() => setShowAddedModal(false)}>
+                <Text style={[styles.modalCancelText, { color: colors.text }]}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -265,6 +320,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "800",
   },
+  buttonsContainer: {
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  talkButton: {
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+  },
+  talkButtonText: { fontWeight: "800" },
   emptyListing: {
     borderRadius: 8,
     padding: 14,
@@ -276,4 +343,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    width: "100%",
+    borderRadius: 12,
+    padding: 18,
+  },
+  modalTitle: { fontSize: 18, fontWeight: "800", marginBottom: 6 },
+  modalMessage: { fontSize: 14, marginBottom: 12 },
+  modalButtons: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
+  modalButton: { paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8 },
+  modalButtonText: { color: "#fff", fontWeight: "700" },
+  modalCancelText: { fontWeight: "700" },
 });
