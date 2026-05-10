@@ -60,7 +60,7 @@ const IndexView = () => {
         <View style={styles.textContainer}>
           <Text style={styles.mainText}>Colecione & negocie</Text>
           <Text style={styles.mainText}>com facilidade.</Text>
-        <Text style={styles.subText}>Compre, venda e descubra cartas raras em um mercado confiável.</Text>
+        <Text style={styles.subText}>Compre, venda e descubra cartas raras em um marketplace seguro e confiável para colecionadores.</Text>
 
         </View>
 
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   // Aumentar o valor = logo maior | Diminuir o valor = logo menor
   logo: {
     height: '15%', // 1/3 da tela
-    top: -50, // Ajuste a posição vertical da logo (negativo para subir, positivo para descer)
+    bottom: 80, // Ajuste a posição vertical da logo (negativo para subir, positivo para descer)
     aspectRatio: 1,
   },
   textContainer: {
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
     textAlign: 'left',
-    textShadowColor: '#4e4e4e',
+    textShadowColor: '#636161',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
   },
@@ -117,9 +117,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#ffffff',
     textAlign: 'left',
-    textShadowColor: '#4e4e4e',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 2,
   },
   // Botão transparente com animação de escala
   // Ajustes de tamanho:
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   // Aumente/diminua 'borderWidth' para aumentar/diminuir a borda (ex: 2, 3, 4)
   button: {
     position: 'absolute',
-    bottom: 40, // Distância da parte de baixo (aumente para descer mais)
+    bottom: 60, // Distância da parte de baixo (aumente para descer mais)
     width: '120%',
     alignItems: 'center',
 
