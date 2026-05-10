@@ -214,7 +214,7 @@ function MyCardsViewContent() {
         activeOpacity={0.85}
         onPress={() => openEditor(item)}
       >
-        <Text style={styles.editButtonText}>Editar</Text>
+        <Text style={styles.editButtonText}>Vender</Text>
       </TouchableOpacity>
     </View>
   );
@@ -273,7 +273,7 @@ function MyCardsViewContent() {
             style={[styles.modalCard, { backgroundColor: colors.surface }]}
             onPress={(event) => event.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Editar Carta</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Vender Carta</Text>
             <Text numberOfLines={1} style={[styles.modalSubtitle, { color: colors.mutedText }]}>
               {editingItem?.name}
             </Text>
