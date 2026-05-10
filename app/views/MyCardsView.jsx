@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
     FlatList,
@@ -52,6 +52,8 @@ function normalizeMoneyValue(value) {
 function MyCardsViewContent() {
   const { width } = useWindowDimensions();
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const editId = params?.editId;
   const { theme } = useAppTheme();
   const colors = theme.colors;
   const [myCards, setMyCards] = useState([]);
@@ -81,6 +83,22 @@ function MyCardsViewContent() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!editId) return;
+    if (editingItem) return;
+
+    const target = myCards.find((c) => String(c.id) === String(editId));
+    if (target) {
+      openEditor(target);
+      // remove query param to avoid reopening
+      try {
+        router.replace('/views/MyCardsView');
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [editId, myCards]);
+
   const formatCardCode = (item) => {
     return item.collectionNumber || item.id;
   };
@@ -93,7 +111,7 @@ function MyCardsViewContent() {
       price: normalizeMoneyValue(item.price),
       idioma: item.idioma ?? "Português",
       qualidade: item.qualidade ?? "NM",
-      quantidadeVenda: String(Math.max(1, Math.min(currentQuantity, Number(item.quantidadeVenda) || 1))),
+      quantidadeVenda: String(Math.max(1, Math.min(currentQuantity, Number(item.quantity ?? item.quantidadeVenda) || 1))),
     });
     setOpenDropdown(null);
   };
@@ -139,8 +157,13 @@ function MyCardsViewContent() {
         return;
       }
 
+      // Save as a sale: ensure aVenda is true and map quantidadeVenda -> quantity
       MyCardsService.updateCard(editingItem.id, {
-        ...draft,
+        price: draft.price,
+        idioma: draft.idioma,
+        qualidade: draft.qualidade,
+        aVenda: true,
+        quantity: saleQuantity,
       });
     }
     closeEditor();
