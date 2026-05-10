@@ -14,6 +14,7 @@ import {
 import { AnimatedCard } from "../components/AnimatedCard";
 import { AuthGuard } from "../components/AuthGuard";
 import TopDropDownMenu from "../components/TopDropDownMenu";
+import { UserService } from "../services/UserService";
 import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { useAppTheme } from "../services/AppThemeContext";
@@ -63,6 +64,8 @@ function MyCardsViewContent() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [removingItem, setRemovingItem] = useState(null);
   const [removeQuantity, setRemoveQuantity] = useState("1");
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
 
   const numColumns = Math.max(2, width > 900 ? 4 : width > 600 ? 3 : 2);
   const spacing = 12;
@@ -73,6 +76,19 @@ function MyCardsViewContent() {
     const quantity = index + 1;
     return { label: String(quantity), value: quantity };
   });
+
+  useEffect(() => {
+    const fetchUserCover = async () => {
+      const session = await UserService.getSession();
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
+      }
+    };
+    fetchUserCover();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = MyCardsService.subscribe(setMyCards);
@@ -253,7 +269,7 @@ function MyCardsViewContent() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title="Minhas Cartas" />
+      <TopDropDownMenu title="Minhas Cartas" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
       <FlatList
         key={numColumns}

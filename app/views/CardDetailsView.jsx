@@ -17,6 +17,7 @@ import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AnuncioService } from "../services/AnuncioService";
 import { CartService } from "../services/CartService";
 import { MyCardsService } from "../services/MyCardsService";
+import { UserService } from "../services/UserService";
 import { PokemonService } from "../services/PokemonService";
 import { ChatService } from "../services/ChatService";
 import { useAppTheme } from "../services/AppThemeContext";
@@ -47,11 +48,26 @@ function CardDetailsViewContent() {
   const cardId = Array.isArray(id) ? id[0] : id;
   const [produto, setProduto] = useState(null);
   const [myCards, setMyCards] = useState([]);
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddedModal, setShowAddedModal] = useState(false);
   const [modalListing, setModalListing] = useState(null);
+
+  useEffect(() => {
+    const fetchUserCover = async () => {
+      const session = await UserService.getSession();
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
+      }
+    };
+    fetchUserCover();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = MyCardsService.subscribe(setMyCards);
@@ -144,7 +160,7 @@ function CardDetailsViewContent() {
 
   return (
     <>
-      <TopDropDownMenu title={produto.name ? `Detalhes - ${produto.name}` : "Detalhes da carta"} />
+      <TopDropDownMenu title={produto.name ? `Detalhes - ${produto.name}` : "Detalhes da carta"} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
       <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.imageContainer}>
           {imageLoading && (

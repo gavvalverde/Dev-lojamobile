@@ -39,10 +39,25 @@ export default function ProfileView() {
   const { theme } = useAppTheme();
   const colors = theme.colors;
   const [user, setUser] = useState(null);
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
   const [favorites, setFavorites] = useState([]);
   const [myCards, setMyCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchUserCover = async () => {
+      const session = await UserService.getSession();
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
+      }
+    };
+    fetchUserCover();
+  }, []);
 
   useEffect(() => {
     const unsubscribeAuth = AuthService.subscribe(setUser);
@@ -75,6 +90,12 @@ export default function ProfileView() {
       FavoritesService.updateSellerProfile(updatedUser);
       MyCardsService.updateSellerProfile(updatedUser);
       setUser(updatedUser);
+      if (updatedUser.coverPhoto) {
+        setUserCoverPhoto(updatedUser.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in updatedUser) {
+        setUseCoverPhotoInHeader(updatedUser.useCoverPhotoInHeader);
+      }
       setEditModalVisible(false);
       Alert.alert("Perfil salvo", "Suas alteracoes ja aparecem no perfil.");
     } catch (error) {
@@ -82,6 +103,32 @@ export default function ProfileView() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRemoveCoverPhoto = () => {
+    Alert.alert("Remover capa", "Tem certeza que deseja remover a capa do perfil?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Remover",
+        onPress: async () => {
+          try {
+            setLoading(true);
+            const updatedUser = await UserService.updateProfile(user.id, { coverPhoto: null });
+            AuthService.setCurrentUser(updatedUser);
+            FavoritesService.updateSellerProfile(updatedUser);
+            MyCardsService.updateSellerProfile(updatedUser);
+            setUser(updatedUser);
+            setUserCoverPhoto("");
+            Alert.alert("Sucesso", "Capa removida com sucesso.");
+          } catch (error) {
+            Alert.alert("Erro", error.message);
+          } finally {
+            setLoading(false);
+          }
+        },
+        style: "destructive",
+      },
+    ]);
   };
 
   const handleLogout = () => {
@@ -123,7 +170,7 @@ export default function ProfileView() {
   return (
     <>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <TopDropDownMenu title="Perfil" />
+        <TopDropDownMenu title="Perfil" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={[styles.profileCard, { backgroundColor: colors.surface }]}>
             <View style={[styles.cover, { backgroundColor: themeColor }]}>
@@ -131,14 +178,6 @@ export default function ProfileView() {
                 <Image source={{ uri: user.coverPhoto }} style={styles.coverImage} />
               )}
               <View style={styles.coverShade} />
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => setEditModalVisible(true)}
-                style={styles.floatingEditButton}
-              >
-                <MaterialCommunityIcons name="pencil" size={18} color="#fff" />
-                <Text style={styles.floatingEditText}>Editar</Text>
-              </TouchableOpacity>
             </View>
 
             <View style={styles.profileBody}>
@@ -323,6 +362,20 @@ const styles = StyleSheet.create({
   floatingEditText: {
     color: "#fff",
     fontWeight: "800",
+  },
+  coverButtons: {
+    alignSelf: "flex-end",
+    flexDirection: "row",
+    gap: 8,
+    margin: 12,
+  },
+  floatingRemoveButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255, 0, 0, 0.6)",
+    borderRadius: 8,
+    justifyContent: "center",
+    paddingHorizontal: 11,
+    paddingVertical: 9,
   },
   profileBody: {
     alignItems: "center",

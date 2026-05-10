@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ImageBackground,
   Modal,
   Pressable,
   StyleSheet,
@@ -21,7 +22,7 @@ const menuItems = [
   { label: "Usuários", path: "/views/UsersManagementView" },
 ];
 
-export default function TopDropDownMenu({ title = "Yellow Duck TCG" }) {
+export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundImage = null }) {
   const [visible, setVisible] = useState(false);
   const { isDarkMode, theme, toggleTheme } = useAppTheme();
   const colors = theme.colors;
@@ -40,8 +41,9 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG" }) {
     router.replace("/views/LoginView");
   };
 
-  return (
-    <View style={[styles.header, { backgroundColor: colors.secondary }]}>
+  const headerContent = (
+    <>
+      {backgroundImage && <View style={styles.headerOverlay} />}
       <TouchableOpacity
         accessibilityLabel="Abrir menu"
         accessibilityRole="button"
@@ -69,6 +71,24 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG" }) {
           color={colors.accent}
         />
       </TouchableOpacity>
+    </>
+  );
+
+  return (
+    <>
+      {backgroundImage ? (
+        <ImageBackground
+          source={{ uri: backgroundImage }}
+          style={[styles.header, { backgroundColor: colors.secondary }]}
+          imageStyle={styles.headerImage}
+        >
+          {headerContent}
+        </ImageBackground>
+      ) : (
+        <View style={[styles.header, { backgroundColor: colors.secondary }]}>
+          {headerContent}
+        </View>
+      )}
 
       <Modal
         animationType="fade"
@@ -98,7 +118,7 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG" }) {
           </View>
         </Pressable>
       </Modal>
-    </View>
+    </>
   );
 }
 
@@ -116,22 +136,36 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 4,
   },
+  headerOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  headerImage: {
+    resizeMode: "cover",
+  },
   menuButton: {
     alignItems: "center",
     height: 48,
     justifyContent: "center",
     width: 48,
+    zIndex: 1,
   },
   title: {
     flex: 1,
     fontSize: 22,
     fontWeight: "700",
+    zIndex: 1,
   },
   themeButton: {
     alignItems: "center",
     height: 48,
     justifyContent: "center",
     width: 48,
+    zIndex: 1,
   },
   backdrop: {
     flex: 1,

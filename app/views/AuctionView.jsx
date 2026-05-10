@@ -13,6 +13,7 @@ import {
 import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AuctionService } from "../services/AuctionService";
 import { AuthService } from "../services/AuthService";
+import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
 import { MyCardsService } from "../services/MyCardsService";
 
@@ -75,11 +76,26 @@ export default function AuctionView() {
   const { theme } = useAppTheme();
   const colors = theme.colors;
   const [user, setUser] = useState(AuthService.getCurrentUser());
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
   const [auctions, setAuctions] = useState([]);
   const [myCards, setMyCards] = useState([]);
   const [bidValues, setBidValues] = useState({});
   const [selectedCards, setSelectedCards] = useState([]);
   const [cardDrafts, setCardDrafts] = useState({});
+
+  useEffect(() => {
+    const fetchUserCover = async () => {
+      const session = await UserService.getSession();
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
+      }
+    };
+    fetchUserCover();
+  }, []);
 
   useEffect(() => {
     const unsubscribeAuth = AuthService.subscribe(setUser);
@@ -377,7 +393,7 @@ export default function AuctionView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title="Leilões Yellow Duck" />
+      <TopDropDownMenu title="Leilões Yellow Duck" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
       <FlatList
         data={auctions}

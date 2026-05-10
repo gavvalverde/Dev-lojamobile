@@ -53,12 +53,20 @@ export default function HomeView() {
   const [selectedMyCard, setSelectedMyCard] = useState(null);
   const [quantityToAdd, setQuantityToAdd] = useState("1");
   const [userName, setUserName] = useState("");
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
 
   useEffect(() => {
     const fetchUserName = async () => {
       const session = await UserService.getSession();
       if (session?.name) {
         setUserName(session.name);
+      }
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
       }
     };
     fetchUserName();
@@ -160,7 +168,7 @@ export default function HomeView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title={`Bem Vindo - ${userName}`} />
+      <TopDropDownMenu title={`Bem Vindo - ${userName}`} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
       <View
         style={[

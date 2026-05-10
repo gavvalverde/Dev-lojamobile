@@ -18,7 +18,8 @@ export default class UserEntity {
     favoritePokemon = "",
     pronouns = "",
     themeColor = "#ffc94a",
-    badges = []
+    badges = [],
+    useCoverPhotoInHeader = true
   ) {
     this.id = id ?? newId();
     this.name = name ?? "";
@@ -35,6 +36,7 @@ export default class UserEntity {
     this.pronouns = pronouns ?? "";
     this.themeColor = themeColor || "#ffc94a";
     this.badges = Array.isArray(badges) ? badges : [];
+    this.useCoverPhotoInHeader = useCoverPhotoInHeader ?? true;
   }
 
   static transforme(data) {
@@ -53,7 +55,8 @@ export default class UserEntity {
       data?.favoritePokemon,
       data?.pronouns,
       data?.themeColor,
-      data?.badges
+      data?.badges,
+      data?.useCoverPhotoInHeader
     );
   }
 
@@ -73,6 +76,7 @@ export default class UserEntity {
       pronouns: this.pronouns,
       themeColor: this.themeColor,
       badges: this.badges,
+      useCoverPhotoInHeader: this.useCoverPhotoInHeader,
     };
   }
 }

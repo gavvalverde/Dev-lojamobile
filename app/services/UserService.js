@@ -86,14 +86,15 @@ export const UserService = {
       updates.photo ?? user.photo,
       updates.phone ?? user.phone,
       updates.bio ?? user.bio,
-      updates.coverPhoto ?? user.coverPhoto,
+      'coverPhoto' in updates ? updates.coverPhoto : user.coverPhoto,
       updates.status ?? user.status,
       updates.handle ?? user.handle,
       updates.location ?? user.location,
       updates.favoritePokemon ?? user.favoritePokemon,
       updates.pronouns ?? user.pronouns,
       updates.themeColor ?? user.themeColor,
-      updates.badges ?? user.badges
+      updates.badges ?? user.badges,
+      'useCoverPhotoInHeader' in updates ? updates.useCoverPhotoInHeader : user.useCoverPhotoInHeader
     );
 
     users[userIndex] = updatedUser;
@@ -136,14 +137,15 @@ export const UserService = {
       updates.photo ?? user.photo,
       updates.phone ?? user.phone,
       updates.bio ?? user.bio,
-      updates.coverPhoto ?? user.coverPhoto,
+      'coverPhoto' in updates ? updates.coverPhoto : user.coverPhoto,
       updates.status ?? user.status,
       updates.handle ?? user.handle,
       updates.location ?? user.location,
       updates.favoritePokemon ?? user.favoritePokemon,
       updates.pronouns ?? user.pronouns,
       updates.themeColor ?? user.themeColor,
-      Array.isArray(updates.badges) ? updates.badges : user.badges
+      Array.isArray(updates.badges) ? updates.badges : user.badges,
+      'useCoverPhotoInHeader' in updates ? updates.useCoverPhotoInHeader : user.useCoverPhotoInHeader
     );
 
     users[userIndex] = updatedUser;

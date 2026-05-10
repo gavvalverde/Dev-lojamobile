@@ -37,6 +37,8 @@ export default function UsersManagementView() {
   const [currentUser, setCurrentUser] = useState(AuthService.getCurrentUser());
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
   const [editingUser, setEditingUser] = useState(null);
   const [form, setForm] = useState({
     name: "",
@@ -45,6 +47,19 @@ export default function UsersManagementView() {
     phone: "",
     badges: [],
   });
+
+  useEffect(() => {
+    const fetchUserCover = async () => {
+      const session = await UserService.getSession();
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
+      }
+    };
+    fetchUserCover();
+  }, []);
 
   useEffect(() => {
     const unsubscribeAuth = AuthService.subscribe(setCurrentUser);
@@ -221,7 +236,7 @@ export default function UsersManagementView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title="Gerenciar usuários" />
+      <TopDropDownMenu title="Gerenciar usuários" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
       <FlatList
         data={filteredUsers}

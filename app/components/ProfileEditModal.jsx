@@ -71,6 +71,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
     coverPhoto: user?.coverPhoto || null,
     themeColor: user?.themeColor || "#ffc94a",
     badges: user?.badges || [],
+    useCoverPhotoInHeader: user?.useCoverPhotoInHeader ?? true,
   });
   const [loading, setLoading] = useState(false);
   const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
@@ -169,6 +170,9 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
         favoritePokemon: form.favoritePokemon.trim(),
         phone: form.phone.trim(),
         bio: form.bio.trim(),
+        photo: form.photo,
+        coverPhoto: form.coverPhoto,
+        useCoverPhotoInHeader: form.useCoverPhotoInHeader,
       });
     } catch (error) {
       Alert.alert("Erro", error.message);
@@ -226,14 +230,41 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
             {form.coverPhoto && (
               <Image source={{ uri: form.coverPhoto }} style={styles.coverImage} />
             )}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => pickImage("coverPhoto", [3, 1])}
-              style={styles.coverAction}
-            >
-              <MaterialCommunityIcons name="image-edit" size={18} color="#fff" />
-              <Text style={styles.coverActionText}>Capa</Text>
-            </TouchableOpacity>
+            <View style={styles.coverActions}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => pickImage("coverPhoto", [3, 1])}
+                style={styles.coverAction}
+              >
+                <MaterialCommunityIcons name="image-edit" size={18} color="#fff" />
+                <Text style={styles.coverActionText}>Capa</Text>
+              </TouchableOpacity>
+              {form.coverPhoto && (
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => updateField("coverPhoto", null)}
+                  style={[styles.coverAction, styles.coverRemoveAction]}
+                >
+                  <MaterialCommunityIcons name="trash-can-outline" size={18} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
+            {form.coverPhoto && (
+              <TouchableOpacity
+                activeOpacity={0.75}
+                onPress={() => updateField("useCoverPhotoInHeader", !form.useCoverPhotoInHeader)}
+                style={[styles.coverToggle, { backgroundColor: form.useCoverPhotoInHeader ? "rgba(0,200,0,0.3)" : "rgba(200,0,0,0.3)" }]}
+              >
+                <MaterialCommunityIcons 
+                  name={form.useCoverPhotoInHeader ? "check-circle" : "circle-outline"} 
+                  size={18} 
+                  color={form.useCoverPhotoInHeader ? "#00c800" : "#ff6b6b"} 
+                />
+                <Text style={[styles.coverToggleText, { color: form.useCoverPhotoInHeader ? "#00c800" : "#ff6b6b" }]}>
+                  {form.useCoverPhotoInHeader ? "Capa ativa na barra superior" : "Capa inativa"}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.previewBody}>
@@ -612,9 +643,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
+  coverActions: {
+    alignSelf: "flex-end",
+    flexDirection: "row",
+    gap: 8,
+  },
+  coverRemoveAction: {
+    backgroundColor: "rgba(255, 0, 0, 0.6)",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
   coverActionText: {
     color: "#fff",
     fontWeight: "800",
+  },
+  coverToggle: {
+    alignItems: "center",
+    alignSelf: "center",
+    borderRadius: 8,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  coverToggleText: {
+    fontWeight: "700",
+    fontSize: 13,
   },
   previewBody: {
     alignItems: "center",

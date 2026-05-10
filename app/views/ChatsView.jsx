@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import TopDropDownMenu from "../components/TopDropDownMenu";
+import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
 import { ChatService } from "../services/ChatService";
 
@@ -19,6 +20,22 @@ export default function ChatsView() {
   const router = useRouter();
 
   const [chats, setChats] = useState([]);
+  const [search, setSearch] = useState("");
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
+
+  useEffect(() => {
+    const fetchUserCover = async () => {
+      const session = await UserService.getSession();
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
+      }
+    };
+    fetchUserCover();
+  }, []);
 
   useEffect(() => {
     // Subscribe ao serviço para receber atualizações
@@ -64,7 +81,7 @@ export default function ChatsView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}> 
-      <TopDropDownMenu title="Mensagens" />
+      <TopDropDownMenu title="Mensagens" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
       <FlatList
         data={chats}

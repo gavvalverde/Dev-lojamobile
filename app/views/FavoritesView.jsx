@@ -14,6 +14,7 @@ import {
 import { AnimatedCard } from "../components/AnimatedCard";
 import { AuthGuard } from "../components/AuthGuard";
 import TopDropDownMenu from "../components/TopDropDownMenu";
+import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
 import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
@@ -32,11 +33,26 @@ function FavoritesViewContent() {
   const [newListName, setNewListName] = useState("");
   const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [cardToAdd, setCardToAdd] = useState(null);
+  const [userCoverPhoto, setUserCoverPhoto] = useState("");
+  const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
 
   const numColumns = Math.max(2, width > 900 ? 4 : width > 600 ? 3 : 2);
   const spacing = 12;
   const cardWidth = (width - spacing * (numColumns + 1)) / numColumns;
   const cardHeight = cardWidth / 0.716;
+
+  useEffect(() => {
+    const fetchUserCover = async () => {
+      const session = await UserService.getSession();
+      if (session?.coverPhoto) {
+        setUserCoverPhoto(session.coverPhoto);
+      }
+      if ('useCoverPhotoInHeader' in session) {
+        setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
+      }
+    };
+    fetchUserCover();
+  }, []);
 
   useEffect(() => {
     const unsubscribeFavorites = FavoritesService.subscribe(setFavorites);
@@ -79,7 +95,7 @@ function FavoritesViewContent() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title="Favoritos" />
+      <TopDropDownMenu title="Favoritos" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
       <View style={styles.listsBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12 }}>
