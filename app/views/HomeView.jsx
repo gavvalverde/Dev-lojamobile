@@ -20,6 +20,7 @@ import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { PokemonService } from "../services/PokemonService";
+import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
 
 function formatCurrency(value) {
@@ -51,6 +52,17 @@ export default function HomeView() {
   const [quantityModalVisible, setQuantityModalVisible] = useState(false);
   const [selectedMyCard, setSelectedMyCard] = useState(null);
   const [quantityToAdd, setQuantityToAdd] = useState("1");
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const session = await UserService.getSession();
+      if (session?.name) {
+        setUserName(session.name);
+      }
+    };
+    fetchUserName();
+  }, []);
 
   useEffect(() => {
     const unsubscribeFavorites = FavoritesService.subscribe(setFavorites);
@@ -148,7 +160,7 @@ export default function HomeView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title="Yellow Duck TCG" />
+      <TopDropDownMenu title={`Bem Vindo - ${userName}`} />
 
       <View
         style={[

@@ -65,6 +65,10 @@ export const UserService = {
     };
   },
 
+  async getSession() {
+    return await getSession();
+  },
+
   async updateProfile(userId, updates) {
     const users = await readUsers();
     const userIndex = users.findIndex((u) => u.id === userId);
