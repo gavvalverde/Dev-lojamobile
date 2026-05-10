@@ -57,9 +57,10 @@ export default function ProfileView() {
 
   const profileStats = useMemo(() => {
     const saleCount = myCards.filter((item) => item.aVenda).length;
+    const totalCards = myCards.reduce((total, item) => total + (item.quantity || 1), 0);
     return [
       { label: "Favoritas", value: favorites.length },
-      { label: "Minhas", value: myCards.length },
+      { label: "Minhas", value: totalCards },
       { label: "À venda", value: saleCount },
       { label: "Insignias", value: user?.badges?.length ?? 0 },
     ];

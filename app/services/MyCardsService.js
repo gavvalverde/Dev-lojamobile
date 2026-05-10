@@ -10,6 +10,10 @@ let myCards = [];
 let hydrated = false;
 let hydratePromise = null;
 
+function normalizeQuantity(value) {
+  return Math.max(1, Number(value) || 1);
+}
+
 const defaultCardFields = {
   aVenda: false,
   idioma: "Português",
@@ -51,6 +55,7 @@ function normalizeCard(card) {
     qualidade: qualityAliases[qualidade] ?? qualidade,
     seller: card.seller ?? card.vendedor ?? (aVenda ? getCurrentSellerSnapshot() : null),
     minhaCarta: true,
+    quantity: normalizeQuantity(card.quantity),
   };
 }
 
@@ -150,6 +155,28 @@ export const MyCardsService = {
 
   isMyCard(id) {
     return myCards.some((item) => item.id === id);
+  },
+
+  getQuantity(id) {
+    return myCards.find((item) => item.id === id)?.quantity ?? 0;
+  },
+
+  addCopies(card, quantity = 1) {
+    const amount = normalizeQuantity(quantity);
+    const existingItem = myCards.find((item) => item.id === card.id);
+
+    if (existingItem) {
+      setCards(
+        myCards.map((item) =>
+          item.id === card.id
+            ? normalizeCard({ ...item, quantity: item.quantity + amount })
+            : item
+        )
+      );
+      return;
+    }
+
+    setCards([normalizeCard({ ...card, quantity: amount }), ...myCards]);
   },
 
   toggleCard(card) {

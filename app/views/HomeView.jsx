@@ -2,6 +2,8 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
     FlatList,
+  Modal,
+  Pressable,
     StyleSheet,
     Text,
     TextInput,
@@ -46,6 +48,9 @@ export default function HomeView() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [cartVisible, setCartVisible] = useState(false);
+  const [quantityModalVisible, setQuantityModalVisible] = useState(false);
+  const [selectedMyCard, setSelectedMyCard] = useState(null);
+  const [quantityToAdd, setQuantityToAdd] = useState("1");
 
   useEffect(() => {
     const unsubscribeFavorites = FavoritesService.subscribe(setFavorites);
@@ -118,12 +123,27 @@ export default function HomeView() {
       formatCardCode={formatCardCode}
       isFavorite={FavoritesService.isFavorite(item.card.id)}
       isMyCard={MyCardsService.isMyCard(item.card.id)}
+      myCardQuantity={MyCardsService.getQuantity(item.card.id)}
       onFavoritePress={(card) => FavoritesService.toggleFavorite(card)}
-      onMyCardPress={(card) => MyCardsService.toggleCard(card)}
+      onMyCardPress={(card) => {
+        setSelectedMyCard(card);
+        setQuantityToAdd("1");
+        setQuantityModalVisible(true);
+      }}
       onPress={(card) => router.push(`/views/CardDetailsView?id=${card.id}`)}
       onAddToCart={(anuncio) => CartService.addItem(anuncio)}
     />
   );
+
+  const confirmAddMyCard = () => {
+    if (!selectedMyCard) return;
+
+    const quantity = Math.max(1, Number(quantityToAdd) || 1);
+    MyCardsService.addCopies(selectedMyCard, quantity);
+    setQuantityModalVisible(false);
+    setSelectedMyCard(null);
+    setQuantityToAdd("1");
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
@@ -227,6 +247,66 @@ export default function HomeView() {
         onClear={() => CartService.clear()}
         onUpdateQuantity={(id, quantity) => CartService.updateQuantity(id, quantity)}
       />
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={quantityModalVisible}
+        onRequestClose={() => setQuantityModalVisible(false)}
+      >
+        <Pressable
+          style={[styles.quantityModalOverlay, { backgroundColor: colors.overlay }]}
+          onPress={() => setQuantityModalVisible(false)}
+        >
+          <Pressable
+            style={[styles.quantityModalCard, { backgroundColor: colors.surface }]}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={[styles.quantityModalTitle, { color: colors.text }]}>Adicionar às minhas cartas</Text>
+            <Text style={[styles.quantityModalSubtitle, { color: colors.mutedText }]}> 
+              {selectedMyCard?.name || "Carta selecionada"}
+            </Text>
+            <Text style={[styles.quantityModalHint, { color: colors.mutedText }]}>Quantas cópias deseja adicionar?</Text>
+
+            <TextInput
+              keyboardType="number-pad"
+              value={quantityToAdd}
+              onChangeText={setQuantityToAdd}
+              placeholder="1"
+              placeholderTextColor={colors.mutedText}
+              style={[
+                styles.quantityModalInput,
+                {
+                  borderColor: colors.border,
+                  color: colors.text,
+                  backgroundColor: colors.surfaceVariant,
+                },
+              ]}
+            />
+
+            {!!selectedMyCard && (
+              <Text style={[styles.quantityModalFootnote, { color: colors.mutedText }]}>Atual: {MyCardsService.getQuantity(selectedMyCard.id)} cópia(s) na coleção.</Text>
+            )}
+
+            <View style={styles.quantityModalActions}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => setQuantityModalVisible(false)}
+                style={[styles.quantityModalButton, { backgroundColor: colors.surfaceVariant }]}
+              >
+                <Text style={[styles.quantityModalCancelText, { color: colors.text }]}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={confirmAddMyCard}
+                style={[styles.quantityModalButton, { backgroundColor: colors.primary }]}
+              >
+                <Text style={styles.quantityModalConfirmText}>Adicionar</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -321,5 +401,63 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     color: "#fff",
     fontWeight: "800",
+  },
+  quantityModalOverlay: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 18,
+  },
+  quantityModalCard: {
+    borderRadius: 14,
+    maxWidth: 420,
+    padding: 18,
+    width: "100%",
+  },
+  quantityModalTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+  },
+  quantityModalSubtitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 4,
+  },
+  quantityModalHint: {
+    fontSize: 13,
+    marginTop: 16,
+  },
+  quantityModalInput: {
+    borderRadius: 10,
+    borderWidth: 1,
+    fontSize: 16,
+    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  quantityModalFootnote: {
+    fontSize: 12,
+    marginTop: 10,
+  },
+  quantityModalActions: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "flex-end",
+    marginTop: 18,
+  },
+  quantityModalButton: {
+    borderRadius: 10,
+    minWidth: 110,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  quantityModalCancelText: {
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  quantityModalConfirmText: {
+    color: "#fff",
+    fontWeight: "800",
+    textAlign: "center",
   },
 });

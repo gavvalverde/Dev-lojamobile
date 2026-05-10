@@ -64,6 +64,7 @@ function FavoritesViewContent() {
         formatCardCode={formatCardCode}
         isFavorite={FavoritesService.isFavorite(item.id)}
         isMyCard={MyCardsService.isMyCard(item.id)}
+        myCardQuantity={MyCardsService.getQuantity(item.id)}
         onFavoritePress={() => FavoritesService.toggleFavorite(item)}
         onMyCardPress={() => MyCardsService.toggleCard(item)}
         onPress={() => router.push(`/views/CardDetailsView?id=${item.id}`)}

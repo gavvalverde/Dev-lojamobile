@@ -19,6 +19,7 @@ export function AnimatedCard({
   onMyCardPress,
   isFavorite = false,
   isMyCard = false,
+  myCardQuantity = 0,
   formatCardCode,
 }) {
   const { theme } = useAppTheme();
@@ -43,6 +44,12 @@ export function AnimatedCard({
     ]).start();
   }, [index, opacity, translateY]);
 
+  const myCardLabel = isMyCard
+    ? myCardQuantity > 1
+      ? `Minha x${myCardQuantity}`
+      : "Minha"
+    : "Minhas";
+
   return (
     <Animated.View
       style={{
@@ -59,6 +66,12 @@ export function AnimatedCard({
           source={{ uri: item.images.small }}
           style={[styles.image, { height: cardHeight }]}
         />
+
+        {myCardQuantity > 1 && (
+          <View style={[styles.quantityBadge, { backgroundColor: colors.primary }]}>
+            <Text style={styles.quantityBadgeText}>{myCardQuantity}x</Text>
+          </View>
+        )}
 
         <View style={styles.actionStack}>
           <TouchableOpacity
@@ -103,7 +116,7 @@ export function AnimatedCard({
                 isMyCard && { color: colors.onAccent },
               ]}
             >
-              {isMyCard ? "Minha" : "Minhas"}
+              {myCardLabel}
             </Text>
           </TouchableOpacity>
         </View>
@@ -129,6 +142,19 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   image: { width: "100%" },
+  quantityBadge: {
+    position: "absolute",
+    left: 8,
+    top: 8,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  quantityBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "800",
+  },
   actionStack: {
     position: "absolute",
     top: 8,
