@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Asset } from "expo-asset";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
@@ -27,6 +28,19 @@ const badgeOptions = [
   "Leilão",
   "Arte favorita",
   "Competitivo",
+];
+const defaultCoverPhotos = [
+  { id: 1, source: require("../../assets/images/capa/capa1.png") },
+  { id: 2, source: require("../../assets/images/capa/capa2.png") },
+  { id: 3, source: require("../../assets/images/capa/capa3.png") },
+  { id: 4, source: require("../../assets/images/capa/capa4.png") },
+  { id: 5, source: require("../../assets/images/capa/capa5.png") },
+  { id: 6, source: require("../../assets/images/capa/capa6.png") },
+  { id: 7, source: require("../../assets/images/capa/capa7.png") },
+  { id: 8, source: require("../../assets/images/capa/capa8.png") },
+  { id: 9, source: require("../../assets/images/capa/capa9.png") },
+  { id: 10, source: require("../../assets/images/capa/capa10.png") },
+  { id: 11, source: require("../../assets/images/capa/capa11.png") },
 ];
 
 function normalizeHandle(value) {
@@ -75,6 +89,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
   });
   const [loading, setLoading] = useState(false);
   const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
+  const [coverPhotoPickerVisible, setCoverPhotoPickerVisible] = useState(false);
   const [customColor, setCustomColor] = useState(user?.themeColor || "#ffc94a");
   const [customBadge, setCustomBadge] = useState("");
 
@@ -111,6 +126,27 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
   const selectAvatar = (avatarId) => {
     updateField("photo", avatarId);
     setAvatarPickerVisible(false);
+  };
+
+  const selectDefaultCover = async (coverPhoto) => {
+    setLoading(true);
+    try {
+      const asset = Asset.fromModule(coverPhoto.source);
+      await asset.downloadAsync();
+      
+      const base64 = await UserService.convertImageToBase64(asset.localUri || asset.uri);
+      updateField("coverPhoto", base64);
+      setCoverPhotoPickerVisible(false);
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao selecionar capa: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectExternalCover = async () => {
+    setCoverPhotoPickerVisible(false);
+    await pickImage("coverPhoto", [3, 1]);
   };
 
   const toggleBadge = (badge) => {
@@ -233,7 +269,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
             <View style={styles.coverActions}>
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => pickImage("coverPhoto", [3, 1])}
+                onPress={() => setCoverPhotoPickerVisible(true)}
                 style={styles.coverAction}
               >
                 <MaterialCommunityIcons name="image-edit" size={18} color="#fff" />
@@ -558,6 +594,53 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
             </View>
           </Pressable>
         </Pressable>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        onRequestClose={() => setCoverPhotoPickerVisible(false)}
+        transparent={false}
+        visible={coverPhotoPickerVisible}
+      >
+        <View style={[styles.coverPickerContainer, { backgroundColor: colors.background }]}>
+          <View
+            style={[
+              styles.coverPickerHeader,
+              { backgroundColor: colors.secondary, borderBottomColor: colors.border },
+            ]}
+          >
+            <TouchableOpacity onPress={() => setCoverPhotoPickerVisible(false)} style={styles.iconButton}>
+              <MaterialCommunityIcons name="close" size={24} color={colors.accent} />
+            </TouchableOpacity>
+            <Text style={[styles.coverPickerTitle, { color: colors.onPrimary }]}>Selecionar capa</Text>
+            <View style={{ width: 48 }} />
+          </View>
+
+          <ScrollView contentContainerStyle={styles.coverPickerContent}>
+            <Text style={[styles.coverPickerSectionTitle, { color: colors.text }]}>Capas padrão</Text>
+            <View style={styles.coverPickerGrid}>
+              {defaultCoverPhotos.map((cover) => (
+                <TouchableOpacity
+                  key={cover.id}
+                  activeOpacity={0.8}
+                  onPress={() => selectDefaultCover(cover)}
+                  style={styles.coverPickerItem}
+                >
+                  <Image source={cover.source} style={styles.coverPickerItemImage} />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={selectExternalCover}
+              style={[styles.coverPickerExternalButton, { backgroundColor: colors.primary }]}
+            >
+              <MaterialCommunityIcons name="cloud-upload-outline" size={24} color="#fff" />
+              <Text style={styles.coverPickerExternalButtonText}>Selecionar da galeria</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
       </Modal>
     </View>
   );
@@ -922,5 +1005,67 @@ const styles = StyleSheet.create({
   avatarPickerButtonText: {
     fontSize: 14,
     fontWeight: "900",
+  },
+  coverPickerContainer: {
+    flex: 1,
+    paddingTop: 0,
+  },
+  coverPickerHeader: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingBottom: 14,
+    paddingHorizontal: 14,
+    paddingTop: 16,
+  },
+  coverPickerTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  iconButton: {
+    alignItems: "center",
+    height: 48,
+    justifyContent: "center",
+    width: 48,
+  },
+  coverPickerContent: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  coverPickerSectionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  coverPickerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 20,
+  },
+  coverPickerItem: {
+    borderRadius: 8,
+    height: 120,
+    overflow: "hidden",
+    width: "48.5%",
+  },
+  coverPickerItemImage: {
+    height: "100%",
+    width: "100%",
+  },
+  coverPickerExternalButton: {
+    alignItems: "center",
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+    minHeight: 54,
+    paddingHorizontal: 16,
+  },
+  coverPickerExternalButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
