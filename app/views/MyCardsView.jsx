@@ -71,7 +71,12 @@ function MyCardsViewContent() {
   const spacing = 12;
   const cardWidth = (width - spacing * (numColumns + 1)) / numColumns;
   const cardHeight = cardWidth / 0.716;
+  const ownedQuantity = editingItem ? MyCardsService.getQuantity(editingItem.id) : 0;
   const saleLabel = draft?.aVenda ? "Sim" : "Não";
+  const saleQuantityOptions = Array.from({ length: Math.max(1, ownedQuantity) }, (_, index) => {
+    const quantity = index + 1;
+    return { label: String(quantity), value: quantity };
+  });
 
   useEffect(() => {
     const unsubscribe = MyCardsService.subscribe(setMyCards);
@@ -87,12 +92,15 @@ function MyCardsViewContent() {
   };
 
   const openEditor = (item) => {
+    const currentQuantity = MyCardsService.getQuantity(item.id);
+
     setEditingItem(item);
     setDraft({
       aVenda: item.aVenda ?? false,
       price: normalizeMoneyValue(item.price),
       idioma: item.idioma ?? "Português",
       qualidade: item.qualidade ?? "NM",
+      quantidadeVenda: String(Math.max(1, Math.min(currentQuantity, Number(item.quantidadeVenda) || 1))),
     });
     setOpenDropdown(null);
   };
@@ -125,13 +133,33 @@ function MyCardsViewContent() {
 
   const saveEditor = () => {
     if (editingItem && draft) {
+      const saleQuantity = Number(String(draft.quantidadeVenda ?? "").replace(/\D/g, "")) || 0;
+
       // Validar preço
       const priceText = String(draft.price ?? "").replace(/\D/g, "");
       if (draft.aVenda && (!priceText || priceText === "0")) {
         alert("Por favor, insira um preço válido");
         return;
       }
-      MyCardsService.updateCard(editingItem.id, draft);
+
+      if (draft.aVenda) {
+        const maxQuantity = MyCardsService.getQuantity(editingItem.id);
+
+        if (saleQuantity < 1) {
+          alert("Informe uma quantidade disponível para venda");
+          return;
+        }
+
+        if (saleQuantity > maxQuantity) {
+          alert(`A quantidade para venda não pode ser maior que ${maxQuantity}`);
+          return;
+        }
+      }
+
+      MyCardsService.updateCard(editingItem.id, {
+        ...draft,
+        quantidadeVenda: draft.aVenda ? saleQuantity : 0,
+      });
     }
     closeEditor();
   };
@@ -204,12 +232,20 @@ function MyCardsViewContent() {
         activeOpacity={0.85}
         onPress={() => openEditor(item)}
       >
-        <Text style={styles.editButtonText}>Editar</Text>
+        <Text style={styles.editButtonText}>Vender</Text>
       </TouchableOpacity>
     </View>
   );
 
   const aVendaDropdown = draft ? renderDropdown("aVenda", "Item à venda", saleLabel, saleOptions) : null;
+  const quantidadeVendaDropdown = draft
+    ? renderDropdown(
+        "quantidadeVenda",
+        "Quantidade disponível para venda",
+        String(draft.quantidadeVenda ?? 1),
+        saleQuantityOptions
+      )
+    : null;
   const idiomaDropdown = draft ? renderDropdown("idioma", "Idioma", draft.idioma, languageOptions) : null;
   const qualidadeDropdown = draft ? renderDropdown("qualidade", "Qualidade", draft.qualidade, qualityOptions) : null;
 
@@ -256,12 +292,18 @@ function MyCardsViewContent() {
             style={[styles.modalCard, { backgroundColor: colors.surface }]}
             onPress={(event) => event.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Editar carta</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Vender Carta</Text>
             <Text numberOfLines={1} style={[styles.modalSubtitle, { color: colors.mutedText }]}>
               {editingItem?.name}
             </Text>
-
             {aVendaDropdown}
+
+            {draft?.aVenda && (
+              <>
+                {quantidadeVendaDropdown}
+                <Text style={[styles.removeHint, { color: colors.mutedText }]}>Você possui {ownedQuantity} unidade(s) na coleção.</Text>
+              </>
+            )}
 
             <View style={styles.field}>
               <Text style={[styles.inputLabel, { color: colors.mutedText }]}>Preço</Text>
