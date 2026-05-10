@@ -14,13 +14,15 @@ export function AuthForm({
   onChange,
   onSubmit,
   onFooterPress,
+  containerStyle,
+  formStyle,
 }) {
   const { theme } = useAppTheme();
   const colors = theme.colors;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.form}>
+    <View style={[styles.container, containerStyle]}>
+      <View style={[styles.form, formStyle]}>
         <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
 
         {showName && (
