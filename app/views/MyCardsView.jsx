@@ -234,16 +234,9 @@ function MyCardsViewContent() {
         onFavoritePress={() => FavoritesService.toggleFavorite(item)}
         onMyCardPress={() => MyCardsService.addCopies(item, 1)}
         onMyCardRemovePress={() => openRemovePopup(item)}
+        onSellPress={() => openEditor(item)}
         onPress={() => router.push(`/views/CardDetailsView?id=${item.id}`)}
       />
-
-      <TouchableOpacity
-        style={[styles.editButton, { backgroundColor: colors.secondary }]}
-        activeOpacity={0.85}
-        onPress={() => openEditor(item)}
-      >
-        <Text style={styles.editButtonText}>Vender</Text>
-      </TouchableOpacity>
     </View>
   );
 
