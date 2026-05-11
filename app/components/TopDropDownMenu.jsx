@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   ImageBackground,
   Modal,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Animated,
   View,
 } from "react-native";
 import { useAppTheme } from "../services/AppThemeContext";
@@ -24,8 +25,31 @@ const menuItems = [
 
 export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundImage = null }) {
   const [visible, setVisible] = useState(false);
+  const menuAnim = useRef(new Animated.Value(-20)).current;
+  const menuOpacity = useRef(new Animated.Value(0)).current;
+
   const { isDarkMode, theme, toggleTheme } = useAppTheme();
   const colors = theme.colors;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(menuAnim, {
+          toValue: 0,
+          friction: 6,
+          useNativeDriver: true,
+        }),
+        Animated.timing(menuOpacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      menuAnim.setValue(-20);
+      menuOpacity.setValue(0);
+    }
+  }, [visible]);
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -97,7 +121,10 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundI
         visible={visible}
       >
         <Pressable style={styles.backdrop} onPress={closeMenu}>
-          <View style={[styles.menu, { backgroundColor: colors.surface }]}>
+          <Animated.View style={[
+            styles.menu, 
+            { backgroundColor: colors.surface, opacity: menuOpacity, transform: [{ translateY: menuAnim }] }
+          ]}>
             {menuItems.map((item) => (
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -115,7 +142,7 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundI
             >
               <Text style={[styles.logoutText, { color: colors.danger }]}>Sair</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </Pressable>
       </Modal>
     </>

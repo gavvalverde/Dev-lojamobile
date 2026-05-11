@@ -38,6 +38,7 @@ export function AnimatedCard({
   const colors = theme.colors;
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(20)).current;
+  const scale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -56,6 +57,20 @@ export function AnimatedCard({
     ]).start();
   }, [index, opacity, translateY]);
 
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
   const myCardLabel = isMyCard
     ? myCardQuantity > 1
       ? `Minha x${myCardQuantity}`
@@ -66,12 +81,14 @@ export function AnimatedCard({
     <Animated.View
       style={{
         opacity,
-        transform: [{ translateY }],
+        transform: [{ translateY }, { scale }],
       }}
     >
       <TouchableOpacity
         style={[styles.card, { width: cardWidth, backgroundColor: colors.surface }]}
-        activeOpacity={0.9}
+        activeOpacity={1}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         onPress={onPress}
       >
         <View style={{ backgroundColor: "#fff", width: cardWidth, height: cardHeight, justifyContent: "center", alignItems: "center" }}>
