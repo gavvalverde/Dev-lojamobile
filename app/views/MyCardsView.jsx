@@ -290,7 +290,7 @@ function MyCardsViewContent() {
             </Text>
             <TouchableOpacity
               style={[styles.catalogButton, { backgroundColor: colors.primary }]}
-              onPress={() => router.push("/")}
+              onPress={() => router.push("/views/HomeView")}
               activeOpacity={0.85}
             >
               <Text style={styles.catalogButtonText}>Ver catálogo</Text>

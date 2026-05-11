@@ -7,6 +7,7 @@ const IndexView = () => {
   const { width, height } = useWindowDimensions();
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
+  const transitionAnim = useRef(new Animated.Value(0)).current;
 
   const handleButtonPress = () => {
     console.log('Botão pressionado!');
@@ -22,17 +23,24 @@ const IndexView = () => {
         duration: 100,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]).start(() => {
+      // Animação suave para esconder a tela antes de navegar
+      Animated.timing(transitionAnim, {
+        toValue: 1,
+        duration: 450,
+        useNativeDriver: true,
+      }).start(() => {
+        const currentUser = AuthService.getCurrentUser();
 
-    const currentUser = AuthService.getCurrentUser();
+        if (currentUser) {
+          router.replace('/views/HomeView');
+          return;
+        }
 
-    if (currentUser) {
-      router.replace('/views/HomeView');
-      return;
-    }
-
-    void AuthService.loadSession().then((sessionUser) => {
-      router.replace(sessionUser ? '/views/HomeView' : '/views/LoginView');
+        void AuthService.loadSession().then((sessionUser) => {
+          router.replace(sessionUser ? '/views/HomeView' : '/views/LoginView');
+        });
+      });
     });
   };
 
@@ -54,6 +62,16 @@ const IndexView = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const transitionFade = transitionAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+
+  const transitionScale = transitionAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.15],
+  });
+
   return (
     <ImageBackground
       source={require('../../assets/images/backgrounds/bg_login.jpg')}
@@ -61,7 +79,7 @@ const IndexView = () => {
       resizeMode="cover"
       imageStyle={styles.backgroundImage}
     >
-      <View style={styles.overlay}>
+      <Animated.View style={[styles.overlay, { opacity: transitionFade, transform: [{ scale: transitionScale }] }]}>
         {/* Logo centralizada - Ajuste a propriedade 'height' para modificar o tamanho */}
         <Image
           source={require('../../assets/images/logo/logoA.png')}
@@ -82,7 +100,7 @@ const IndexView = () => {
             <Text style={styles.buttonText}>Começar Agora!</Text>
           </TouchableOpacity>
         </Animated.View>
-      </View>
+      </Animated.View>
     </ImageBackground>
   );
 };
