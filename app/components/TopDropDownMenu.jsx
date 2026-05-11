@@ -15,7 +15,8 @@ import { useAppTheme } from "../services/AppThemeContext";
 import { AuthService } from "../services/AuthService";
 
 const menuItems = [
-  { label: "Catálogo TCG", path: "/views/HomeView" },
+  { label: "Página Inicial", path: "/views/HomeView" },
+  { label: "Catálogo TCG", path: "/views/CatalogView" },
   { label: "Favoritos", path: "/views/FavoritesView" },
   { label: "Minhas Cartas", path: "/views/MyCardsView" },
   { label: "Mensagens", path: "/views/ChatsView" },

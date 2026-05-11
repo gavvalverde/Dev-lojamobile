@@ -44,10 +44,6 @@ export default function HomeView() {
   const [, setFavorites] = useState([]);
   const [myCards, setMyCards] = useState([]);
   const [cartItems, setCartItems] = useState([]);
-  const [search, setSearch] = useState("");
-  const [apiCards, setApiCards] = useState([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchError, setSearchError] = useState("");
   const [cartVisible, setCartVisible] = useState(false);
   const [quantityModalVisible, setQuantityModalVisible] = useState(false);
   const [selectedMyCard, setSelectedMyCard] = useState(null);
@@ -84,48 +80,9 @@ export default function HomeView() {
     };
   }, []);
 
-  useEffect(() => {
-    const term = search.trim();
-
-    if (!term) {
-      setApiCards([]);
-      setSearchError("");
-      setSearchLoading(false);
-      return;
-    }
-
-    let active = true;
-    setSearchLoading(true);
-    setSearchError("");
-
-    const timeout = setTimeout(async () => {
-      try {
-        const cards = await PokemonService.searchCards(term);
-        if (active) setApiCards(cards);
-      } catch (error) {
-        console.error("Erro ao buscar cartas na API:", error);
-        if (active) {
-          setApiCards([]);
-          setSearchError("Não foi possível buscar cartas agora.");
-        }
-      } finally {
-        if (active) setSearchLoading(false);
-      }
-    }, 450);
-
-    return () => {
-      active = false;
-      clearTimeout(timeout);
-    };
-  }, [search]);
-
   const cardResults = useMemo(() => {
-    if (search.trim()) {
-      return AnuncioService.buildSearchResults(apiCards, myCards);
-    }
-
     return AnuncioService.buildCatalogResults(myCards);
-  }, [apiCards, myCards, search]);
+  }, [myCards]);
 
   const cartTotal = CartService.getTotal(cartItems);
   const cartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -152,7 +109,7 @@ export default function HomeView() {
       }}
       onPress={(card) => router.push(`/views/CardDetailsView?id=${card.id}`)}
       onAddToCart={(anuncio) => CartService.addItem(anuncio)}
-      catalogView={!search.trim()}
+      catalogView={true}
     />
   );
 
@@ -203,60 +160,27 @@ export default function HomeView() {
         columnWrapperStyle={{ justifyContent: "space-between", marginBottom: spacing }}
         ListHeaderComponent={
           <View>
-            <TextInput
-              placeholder="Buscar cartas Pokemon TCG"
-              value={search}
-              onChangeText={setSearch}
-              placeholderTextColor={colors.mutedText}
-              style={[
-                styles.searchInput,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                  color: colors.text,
-                },
-              ]}
-            />
-
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {search.trim() ? "Cartas encontradas" : "Cartas à venda"}
+              Cartas à venda
             </Text>
-            {searchLoading && (
-              <View style={styles.loadingContainer}>
-                <Image
-                  source={require('../../assets/images/backgrounds/load.gif')}
-                  style={styles.loadingGif}
-                />
-                <Text style={[styles.searchStatus, { color: colors.mutedText }]}>Buscando na API...</Text>
-              </View>
-            )}
-            {!!searchError && (
-              <Text style={[styles.searchError, { color: colors.danger }]}>{searchError}</Text>
-            )}
           </View>
         }
         ListEmptyComponent={
-          !searchLoading ? (
-            <View style={styles.emptyState}>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta à venda"}
-              </Text>
-              <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-                {search.trim()
-                  ? "Tente buscar por outro nome de carta Pokemon TCG."
-                  : "Vá em Minhas Cartas, toque em Editar e marque uma carta como item à venda."}
-              </Text>
-              {!search.trim() && (
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  onPress={() => router.push("/views/MyCardsView")}
-                  style={[styles.emptyButton, { backgroundColor: colors.primary }]}
-                >
-                  <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ) : null
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              Nenhuma carta à venda
+            </Text>
+            <Text style={[styles.emptyText, { color: colors.mutedText }]}>
+              Vá em Minhas Cartas, toque em Editar e marque uma carta como item à venda.
+            </Text>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => router.push("/views/MyCardsView")}
+              style={[styles.emptyButton, { backgroundColor: colors.primary }]}
+            >
+              <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
+            </TouchableOpacity>
+          </View>
         }
       />
 
