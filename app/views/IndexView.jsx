@@ -106,9 +106,11 @@ const styles = StyleSheet.create({
   // Ajuste o valor de 'height' para modificar o tamanho da logo
   // Aumentar o valor = logo maior | Diminuir o valor = logo menor
   logo: {
-    height: '15%', // 1/3 da tela
-    bottom: 80, // Ajuste a posição vertical da logo (negativo para subir, positivo para descer)
+    height: '35%', // Maior, ocupando 35% da tela
+    maxHeight: 280,
     aspectRatio: 1,
+    marginTop: -80, // Sobe a logo um pouco para não empurrar os textos muito para baixo
+    marginBottom: 20, // Dá espaço para o texto respirar em vez de empurrá-lo sumindo
   },
   textContainer: {
     marginTop: 40,
