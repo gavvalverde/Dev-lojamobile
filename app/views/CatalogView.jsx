@@ -13,10 +13,8 @@ import {
     Image,
 } from "react-native";
 import { CardSearchResult } from "../components/CardSearchResult";
-import { CartModal } from "../components/CartModal";
 import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AnuncioService } from "../services/AnuncioService";
-import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { PokemonService } from "../services/PokemonService";
@@ -161,9 +159,8 @@ export default function CatalogView() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title={`Bem Vindo - ${userName}`} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
+      <TopDropDownMenu title={`Catálogo TCG`} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
-      
       <FlatList
         key={numColumns}
         data={cardResults}
@@ -213,22 +210,14 @@ export default function CatalogView() {
           !searchLoading ? (
             <View style={styles.emptyState}>
               <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                {search.trim() ? "Nenhuma carta encontrada" : "Nenhuma carta à venda"}
+                {search.trim() ? "Nenhuma carta encontrada" : "Bem-vindo ao Catálogo TCG"}
               </Text>
               <Text style={[styles.emptyText, { color: colors.mutedText }]}>
                 {search.trim()
                   ? "Tente buscar por outro nome de carta Pokemon TCG."
-                  : "Vá em Minhas Cartas, toque em Editar e marque uma carta como item à venda."}
+                  : "Digite o nome de uma carta acima para realizar a busca."}
               </Text>
-              {!search.trim() && (
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  onPress={() => router.push("/views/MyCardsView")}
-                  style={[styles.emptyButton, { backgroundColor: colors.primary }]}
-                >
-                  <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
-                </TouchableOpacity>
-              )}
+              
             </View>
           ) : null
         }

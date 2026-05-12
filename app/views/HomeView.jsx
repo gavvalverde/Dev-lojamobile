@@ -19,7 +19,6 @@ import { AnuncioService } from "../services/AnuncioService";
 import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
-import { PokemonService } from "../services/PokemonService";
 import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
 
