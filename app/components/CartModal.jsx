@@ -1,5 +1,6 @@
 import {
   FlatList,
+  Image,
   Modal,
   Pressable,
   StyleSheet,
@@ -24,12 +25,16 @@ export function CartModal({
   onClose,
   onClear,
   onUpdateQuantity,
+  onRemoveItem,
 }) {
   const { theme } = useAppTheme();
   const colors = theme.colors;
 
   const renderCartItem = ({ item }) => (
     <View style={[styles.cartItem, { borderBottomColor: colors.border }]}>
+      {item.images?.small && (
+        <Image source={{ uri: item.images.small }} style={styles.cartItemImage} />
+      )}
       <View style={styles.cartItemInfo}>
         <SellerBadge seller={item.seller} compact />
         <Text numberOfLines={1} style={[styles.cartItemName, { color: colors.text }]}>
@@ -37,6 +42,9 @@ export function CartModal({
         </Text>
         <Text style={[styles.cartItemPrice, { color: colors.mutedText }]}>
           {formatCurrency(item.unitPrice)} cada
+        </Text>
+        <Text style={[styles.cartItemSubtotal, { color: colors.text }]}>
+          Subtotal: {formatCurrency(item.unitPrice * item.quantity)}
         </Text>
       </View>
 
@@ -55,6 +63,13 @@ export function CartModal({
           style={[styles.quantityButton, { backgroundColor: colors.surfaceVariant }]}
         >
           <Text style={[styles.quantityButtonText, { color: colors.text }]}>+</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityLabel="Remover item"
+          onPress={() => onRemoveItem(item.id)}
+          style={[styles.removeButton, { backgroundColor: colors.error }]}
+        >
+          <Text style={styles.removeButtonText}>×</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -98,8 +113,16 @@ export function CartModal({
               </TouchableOpacity>
               <TouchableOpacity
                 activeOpacity={0.85}
+                onPress={() => onCheckout && onCheckout()}
+                style={[styles.modalButton, styles.checkoutButton, { backgroundColor: colors.primary }]}
+                disabled={items.length === 0}
+              >
+                <Text style={styles.checkoutButtonText}>Finalizar Compra</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
                 onPress={onClose}
-                style={[styles.modalButton, styles.closeButton, { backgroundColor: colors.primary }]}
+                style={[styles.modalButton, styles.closeButton, { backgroundColor: colors.secondary }]}
               >
                 <Text style={styles.closeButtonText}>Fechar</Text>
               </TouchableOpacity>
@@ -138,6 +161,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 10,
   },
+  cartItemImage: {
+    width: 50,
+    height: 70,
+    borderRadius: 4,
+  },
   cartItemInfo: {
     flex: 1,
   },
@@ -147,6 +175,11 @@ const styles = StyleSheet.create({
   },
   cartItemPrice: {
     fontSize: 12,
+    marginTop: 2,
+  },
+  cartItemSubtotal: {
+    fontSize: 13,
+    fontWeight: "600",
     marginTop: 2,
   },
   quantityControls: {
@@ -170,6 +203,18 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     minWidth: 20,
     textAlign: "center",
+  },
+  removeButton: {
+    alignItems: "center",
+    borderRadius: 6,
+    height: 32,
+    justifyContent: "center",
+    width: 32,
+  },
+  removeButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "800",
   },
   emptyCartText: {
     paddingVertical: 20,
@@ -197,6 +242,10 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   clearButton: {
+  },
+  checkoutButton: {
+  },
+  closeButton: {
   },
   clearButtonText: {
     fontWeight: "800",

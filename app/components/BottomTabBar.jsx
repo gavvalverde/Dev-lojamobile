@@ -62,7 +62,7 @@ export default function BottomTabBar({ state, descriptors, navigation }) {
         };
 
         const iconName = ICON_MAP[route.name] ?? "circle";
-        const isHome = route.name === "views/HomeView";
+        const isActive = isFocused;
 
         return (
           <TouchableOpacity
@@ -73,18 +73,18 @@ export default function BottomTabBar({ state, descriptors, navigation }) {
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={[styles.tabButton, isHome && styles.homeButton]}
+            style={styles.tabButton}
           >
             <View
               style={[
                 styles.iconWrapper,
-                isHome && styles.homeIconWrapper,
-                isHome && { backgroundColor: colors.accent },
+                isActive && styles.activeIconWrapper,
+                isActive && { backgroundColor: colors.accent },
               ]}
             >
               <MaterialCommunityIcons
                 name={iconName}
-                size={isHome ? 28 : 24}
+                size={isActive ? 28 : 24}
                 color={isFocused ? colors.primary : colors.mutedText}
               />
             </View>
@@ -117,10 +117,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  homeButton: {
-    flex: 1,
-  },
-  homeIconWrapper: {
+  activeIconWrapper: {
     width: 52,
     height: 52,
     borderRadius: 26,

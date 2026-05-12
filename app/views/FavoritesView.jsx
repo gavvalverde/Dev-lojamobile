@@ -35,6 +35,11 @@ function FavoritesViewContent() {
   const [cardToAdd, setCardToAdd] = useState(null);
   const [userCoverPhoto, setUserCoverPhoto] = useState("");
   const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameListId, setRenameListId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteListId, setDeleteListId] = useState(null);
 
   const numColumns = Math.max(2, width > 900 ? 4 : width > 600 ? 3 : 2);
   const spacing = 12;
@@ -65,6 +70,28 @@ function FavoritesViewContent() {
       unsubscribeLists();
     };
   }, []);
+
+  const selectedList = selectedListId ? ListsService.getById(selectedListId) : null;
+  const currentData = selectedList ? (selectedList.cards || []) : favorites;
+  const filteredData = currentData.filter(item => !searchText || (item.name && item.name.toLowerCase().includes(searchText.toLowerCase())));
+
+  const handleRename = () => {
+    if (newListName.trim()) {
+      ListsService.renameList(renameListId, newListName.trim());
+      setShowRenameModal(false);
+      setRenameListId(null);
+      setNewListName("");
+    }
+  };
+
+  const handleDelete = () => {
+    ListsService.deleteList(deleteListId);
+    setShowDeleteModal(false);
+    setDeleteListId(null);
+    if (selectedListId === deleteListId) {
+      setSelectedListId(null);
+    }
+  };
 
   const formatCardCode = (item) => {
     return item.collectionNumber || item.id;
@@ -97,27 +124,73 @@ function FavoritesViewContent() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <TopDropDownMenu title="Favoritos" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
-      <View style={styles.listsBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12 }}>
-          <TouchableOpacity onPress={() => setSelectedListId(null)} style={[styles.listChip, selectedListId === null && { borderColor: colors.primary }]}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          value={searchText}
+          onChangeText={setSearchText}
+          placeholder="Buscar cartas..."
+          placeholderTextColor={colors.mutedText}
+          style={[styles.searchInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.surface }]}
+        />
+      </View>
+
+      <View style={[styles.listsBar, { borderBottomColor: colors.border }]}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.listsContent}
+        >
+          <TouchableOpacity
+          onPress={() => setShowCreateModal(true)}
+          style={[styles.createListButton, { backgroundColor: colors.primary, alignSelf: "flex-start", marginHorizontal: 12, marginVertical: 8 }]}
+          >
+            <Text style={styles.createListText}>+ Criar lista</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setSelectedListId(null)}
+            style={[styles.listChip, selectedListId === null && { borderColor: colors.primary }]}
+          >
             <Text style={{ color: colors.text }}>Todas</Text>
           </TouchableOpacity>
 
           {lists.map((l) => (
-            <TouchableOpacity key={l.id} onPress={() => setSelectedListId(l.id)} style={[styles.listChip, selectedListId === l.id && { borderColor: colors.primary }]}>
-              <Text style={{ color: colors.text }}>{l.name} ({(l.cards || []).length})</Text>
-            </TouchableOpacity>
+            <View key={l.id} style={styles.listChipContainer}>
+              <TouchableOpacity
+                onPress={() => setSelectedListId(l.id)}
+                style={[styles.listChip, selectedListId === l.id && { borderColor: colors.primary }]}
+              >
+                <Text style={{ color: colors.text }}>{l.name} ({(l.cards || []).length})</Text>
+              </TouchableOpacity>
+            </View>
           ))}
-
-          <TouchableOpacity onPress={() => setShowCreateModal(true)} style={[styles.createListButton, { backgroundColor: colors.primary }]}>
-            <Text style={styles.createListText}>+ Criar lista</Text>
-          </TouchableOpacity>
         </ScrollView>
       </View>
 
+      {selectedList ? (
+        <View style={[styles.selectedListBanner, { borderColor: colors.primary, backgroundColor: colors.surface }]}> 
+          <View>
+            <Text style={[styles.selectedListText, { color: colors.text }]}>{selectedList.name} ({(selectedList.cards || []).length})</Text>
+          </View>
+          <View style={styles.selectedListActions}>
+            <TouchableOpacity
+              onPress={() => { setRenameListId(selectedList.id); setNewListName(selectedList.name); setShowRenameModal(true); }}
+              style={[styles.bannerActionButton, { borderColor: colors.border }]}
+            >
+              <Text style={[styles.actionText, { color: colors.primary, fontWeight: 'bold' }]}>Renomear</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { setDeleteListId(selectedList.id); setShowDeleteModal(true); }}
+              style={[styles.bannerActionButton, { borderColor: colors.border }]}
+            >
+              <Text style={[styles.actionText, { color: colors.danger, fontWeight: 'bold' }]}>Excluir</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : null}
+
       <FlatList
         key={numColumns}
-        data={selectedListId ? (ListsService.getById(selectedListId)?.cards || []) : favorites}
+        data={filteredData}
         renderItem={renderCard}
         keyExtractor={(item) => String(item.id)}
         numColumns={numColumns}
@@ -182,6 +255,42 @@ function FavoritesViewContent() {
           </View>
         </View>
       </Modal>
+
+      {/* Rename list modal */}
+      <Modal visible={showRenameModal} transparent animationType="fade" onRequestClose={() => setShowRenameModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Renomear lista</Text>
+            <TextInput value={newListName} onChangeText={setNewListName} placeholder="Nome da lista" placeholderTextColor={colors.mutedText} style={[styles.input, { color: colors.text, borderColor: colors.border }]} />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setShowRenameModal(false)} style={[styles.modalBtn, { borderColor: colors.border }]}>
+                <Text style={{ color: colors.text }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleRename} style={[styles.modalBtn, { backgroundColor: colors.primary }]}>
+                <Text style={{ color: '#fff' }}>Renomear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete list modal */}
+      <Modal visible={showDeleteModal} transparent animationType="fade" onRequestClose={() => setShowDeleteModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Excluir lista</Text>
+            <Text style={[styles.modalText, { color: colors.text }]}>Tem certeza que deseja excluir esta lista? Esta ação não pode ser desfeita.</Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setShowDeleteModal(false)} style={[styles.modalBtn, { borderColor: colors.border }]}>
+                <Text style={{ color: colors.text }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDelete} style={[styles.modalBtn, { backgroundColor: '#ff4444' }]}>
+                <Text style={{ color: '#fff' }}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -197,6 +306,17 @@ export default function FavoritesView() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
   },
   emptyList: {
     flexGrow: 1,
@@ -233,11 +353,62 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: 1,
   },
+  listsContent: {
+    paddingHorizontal: 12,
+    gap: 8,
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  selectedListBanner: {
+    marginHorizontal: 12,
+    marginVertical: 12,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  selectedListText: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  clearSelectionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+  },
   listChip: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
+    marginRight: 8,
+  },
+  listChipContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  actionButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginLeft: 4,
+  },
+  actionText: {
+    fontSize: 14,
+  },
+  selectedListActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bannerActionButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: 12,
     marginRight: 8,
   },
   createListButton: {
@@ -253,6 +424,7 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", alignItems: "center", padding: 18 },
   modalContent: { width: "100%", maxWidth: 520, borderRadius: 12, padding: 16 },
   modalTitle: { fontSize: 18, fontWeight: "800", marginBottom: 8 },
+  modalText: { fontSize: 14, marginBottom: 16, textAlign: 'center' },
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 12 },
   modalActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
   modalBtn: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8, borderWidth: 1 },

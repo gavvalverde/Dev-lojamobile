@@ -89,6 +89,14 @@ export const ListsService = {
     setLists(lists.filter((l) => String(l.id) !== String(id)));
   },
 
+  renameList(id, newName) {
+    setLists(
+      lists.map((l) =>
+        String(l.id) === String(id) ? { ...l, name: newName } : l
+      )
+    );
+  },
+
   addCardToList(listId, card) {
     setLists(
       lists.map((l) =>

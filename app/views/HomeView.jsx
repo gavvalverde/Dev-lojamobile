@@ -191,6 +191,13 @@ export default function HomeView() {
         onClose={() => setCartVisible(false)}
         onClear={() => CartService.clear()}
         onUpdateQuantity={(id, quantity) => CartService.updateQuantity(id, quantity)}
+        onRemoveItem={(id) => CartService.removeItem(id)}
+        onCheckout={() => {
+          // Simulação de checkout - em um app real, isso enviaria para API
+          alert(`Compra finalizada! Total: R$ ${cartTotal.toFixed(2).replace('.', ',')}`);
+          CartService.clear();
+          setCartVisible(false);
+        }}
       />
 
       <Modal

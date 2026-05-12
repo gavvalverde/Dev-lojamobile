@@ -66,6 +66,7 @@ function MyCardsViewContent() {
   const [removeQuantity, setRemoveQuantity] = useState("1");
   const [userCoverPhoto, setUserCoverPhoto] = useState("");
   const [useCoverPhotoInHeader, setUseCoverPhotoInHeader] = useState(true);
+  const [searchText, setSearchText] = useState("");
 
   const numColumns = Math.max(2, width > 900 ? 4 : width > 600 ? 3 : 2);
   const spacing = 12;
@@ -114,6 +115,8 @@ function MyCardsViewContent() {
       }
     }
   }, [editId, myCards]);
+
+  const filteredCards = myCards.filter(item => !searchText || (item.name && item.name.toLowerCase().includes(searchText.toLowerCase())));
 
   const formatCardCode = (item) => {
     return item.collectionNumber || item.id;
@@ -271,9 +274,19 @@ function MyCardsViewContent() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <TopDropDownMenu title="Minhas Cartas" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
+      <View style={styles.searchContainer}>
+        <TextInput
+          value={searchText}
+          onChangeText={setSearchText}
+          placeholder="Buscar cartas..."
+          placeholderTextColor={colors.mutedText}
+          style={[styles.searchInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.surface }]}
+        />
+      </View>
+
       <FlatList
         key={numColumns}
-        data={myCards}
+        data={filteredCards}
         renderItem={renderCard}
         keyExtractor={(item) => String(item.id)}
         numColumns={numColumns}
@@ -447,6 +460,17 @@ export default function MyCardsView() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#f5f6fa" },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
+  },
   header: {
     padding: 16,
     backgroundColor: "#fff",
