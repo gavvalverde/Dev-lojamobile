@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { useAppTheme } from "../services/AppThemeContext";
 import { UserService } from "../services/UserService";
-import { getProfileAvatarOptions, getProfilePhotoSource } from "../utils/profilePhoto";
+import { getProfileAvatarOptions, getProfilePhotoSource } from "../services/ProfilePhotoService";
 
 const colorOptions = ["#ffc94a", "#039be5", "#06243a", "#ffffff", "#ff8f3d"];
 const badgeOptions = [

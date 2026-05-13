@@ -18,7 +18,7 @@ import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
-import { getProfilePhotoSource } from "../utils/profilePhoto";
+import { getProfilePhotoSource } from "../services/ProfilePhotoService";
 
 function getInitials(name) {
   return String(name ?? "")

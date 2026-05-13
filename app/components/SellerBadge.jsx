@@ -1,6 +1,6 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import { useAppTheme } from "../services/AppThemeContext";
-import { getProfilePhotoSource } from "../utils/profilePhoto";
+import { getProfilePhotoSource } from "../services/ProfilePhotoService";
 
 function getInitials(name) {
   return String(name ?? "YD")
