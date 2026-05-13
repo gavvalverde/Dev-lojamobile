@@ -1,56 +1,26 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import {
-  ImageBackground,
   Modal,
   Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
-  Animated,
   View,
 } from "react-native";
 import { useAppTheme } from "../services/AppThemeContext";
 import { AuthService } from "../services/AuthService";
 
 const menuItems = [
-  { label: "Página Inicial", path: "/views/HomeView" },
-  { label: "Catálogo TCG", path: "/views/CatalogView" },
-  { label: "Favoritos", path: "/views/FavoritesView" },
-  { label: "Minhas Cartas", path: "/views/MyCardsView" },
-  { label: "Mensagens", path: "/views/ChatsView" },
-  { label: "Leilões", path: "/views/AuctionView" },
-  { label: "Usuários", path: "/views/UsersManagementView" },
+  { label: "Usuarios", path: "/views/UsersManagementView" }
 ];
 
-export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundImage = null }) {
+export default function TopDropDownMenu({ title = "Yellow Duck TCG", variant = "brand" }) {
   const [visible, setVisible] = useState(false);
-  const menuAnim = useRef(new Animated.Value(-20)).current;
-  const menuOpacity = useRef(new Animated.Value(0)).current;
-
   const { isDarkMode, theme, toggleTheme } = useAppTheme();
   const colors = theme.colors;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.spring(menuAnim, {
-          toValue: 0,
-          friction: 6,
-          useNativeDriver: true,
-        }),
-        Animated.timing(menuOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      menuAnim.setValue(-20);
-      menuOpacity.setValue(0);
-    }
-  }, [visible]);
+  const isSurface = variant === "surface";
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -66,9 +36,17 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundI
     router.replace("/views/LoginView");
   };
 
-  const headerContent = (
-    <>
-      {backgroundImage && <View style={styles.headerOverlay} />}
+  return (
+    <View
+      style={[
+        styles.header,
+        {
+          backgroundColor: isSurface ? colors.surface : colors.secondary,
+          borderBottomColor: isSurface ? colors.border : "transparent",
+        },
+        isSurface && styles.surfaceHeader,
+      ]}
+    >
       <TouchableOpacity
         accessibilityLabel="Abrir menu"
         accessibilityRole="button"
@@ -76,10 +54,10 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundI
         onPress={openMenu}
         style={styles.menuButton}
       >
-        <MaterialIcons name="menu" size={28} color={colors.accent} />
+        <MaterialIcons name="menu" size={28} color={isSurface ? colors.text : colors.accent} />
       </TouchableOpacity>
 
-      <Text numberOfLines={1} style={[styles.title, { color: colors.onPrimary }]}>
+      <Text numberOfLines={1} style={[styles.title, { color: isSurface ? colors.text : colors.onPrimary }]}>
         {title}
       </Text>
 
@@ -93,27 +71,9 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundI
         <MaterialIcons
           name={isDarkMode ? "light-mode" : "dark-mode"}
           size={24}
-          color={colors.accent}
+          color={isSurface ? colors.primary : colors.accent}
         />
       </TouchableOpacity>
-    </>
-  );
-
-  return (
-    <>
-      {backgroundImage ? (
-        <ImageBackground
-          source={{ uri: backgroundImage }}
-          style={[styles.header, { backgroundColor: colors.secondary }]}
-          imageStyle={styles.headerImage}
-        >
-          {headerContent}
-        </ImageBackground>
-      ) : (
-        <View style={[styles.header, { backgroundColor: colors.secondary }]}>
-          {headerContent}
-        </View>
-      )}
 
       <Modal
         animationType="fade"
@@ -122,10 +82,7 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundI
         visible={visible}
       >
         <Pressable style={styles.backdrop} onPress={closeMenu}>
-          <Animated.View style={[
-            styles.menu, 
-            { backgroundColor: colors.surface, opacity: menuOpacity, transform: [{ translateY: menuAnim }] }
-          ]}>
+          <View style={[styles.menu, { backgroundColor: colors.surface }]}>
             {menuItems.map((item) => (
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -143,17 +100,17 @@ export default function TopDropDownMenu({ title = "Yellow Duck TCG", backgroundI
             >
               <Text style={[styles.logoutText, { color: colors.danger }]}>Sair</Text>
             </TouchableOpacity>
-          </Animated.View>
+          </View>
         </Pressable>
       </Modal>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
     alignItems: "center",
-    backgroundColor: "#fff",
+    borderBottomWidth: 0,
     elevation: 4,
     flexDirection: "row",
     gap: 8,
@@ -164,36 +121,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 4,
   },
-  headerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-  },
-  headerImage: {
-    resizeMode: "cover",
+  surfaceHeader: {
+    borderBottomWidth: 1,
+    elevation: 0,
+    shadowOpacity: 0,
   },
   menuButton: {
     alignItems: "center",
     height: 48,
     justifyContent: "center",
     width: 48,
-    zIndex: 1,
   },
   title: {
     flex: 1,
     fontSize: 22,
     fontWeight: "700",
-    zIndex: 1,
   },
   themeButton: {
     alignItems: "center",
     height: 48,
     justifyContent: "center",
     width: 48,
-    zIndex: 1,
   },
   backdrop: {
     flex: 1,
@@ -218,7 +166,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   menuText: {
-    color: "#222",
     fontSize: 16,
     fontWeight: "600",
   },
