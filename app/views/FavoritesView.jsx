@@ -19,6 +19,7 @@ import { useAppTheme } from "../services/AppThemeContext";
 import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { ListsService } from "../services/ListsService";
+import AnimatedScreenWrapper from "../components/AnimatedScreenWrapper";
 
 function FavoritesViewContent() {
   const { width } = useWindowDimensions();
@@ -121,7 +122,8 @@ function FavoritesViewContent() {
   );
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+    <AnimatedScreenWrapper>
+      <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <TopDropDownMenu title="Favoritos" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
       <View style={styles.searchContainer}>
@@ -292,6 +294,7 @@ function FavoritesViewContent() {
         </View>
       </Modal>
     </View>
+    </AnimatedScreenWrapper>
   );
 }
 

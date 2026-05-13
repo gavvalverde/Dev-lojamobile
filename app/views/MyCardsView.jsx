@@ -16,8 +16,7 @@ import { AuthGuard } from "../components/AuthGuard";
 import TopDropDownMenu from "../components/TopDropDownMenu";
 import { UserService } from "../services/UserService";
 import { FavoritesService } from "../services/FavoritesService";
-import { MyCardsService } from "../services/MyCardsService";
-import { useAppTheme } from "../services/AppThemeContext";
+import { MyCardsService } from "../services/MyCardsService";import AnimatedScreenWrapper from "../components/AnimatedScreenWrapper";import { useAppTheme } from "../services/AppThemeContext";
 
 const languageOptions = ["Português", "Inglês", "Japonês", "Espanhol", "Francês"];
 const qualityOptions = ["NM", "LP", "MP", "HP", "DMG"];
@@ -271,6 +270,7 @@ function MyCardsViewContent() {
     : null;
 
   return (
+    <AnimatedScreenWrapper>
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <TopDropDownMenu title="Minhas Cartas" backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
@@ -447,6 +447,7 @@ function MyCardsViewContent() {
         </Pressable>
       </Modal>
     </View>
+    </AnimatedScreenWrapper>
   );
 }
 

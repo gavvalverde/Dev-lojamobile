@@ -20,6 +20,7 @@ import { CartService } from "../services/CartService";
 import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { UserService } from "../services/UserService";
+import AnimatedScreenWrapper from "../components/AnimatedScreenWrapper";
 import { useAppTheme } from "../services/AppThemeContext";
 
 function formatCurrency(value) {
@@ -123,6 +124,7 @@ export default function HomeView() {
   };
 
   return (
+    <AnimatedScreenWrapper>
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <TopDropDownMenu title={`Bem Vindo - ${userName}`} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
@@ -259,6 +261,7 @@ export default function HomeView() {
         </Pressable>
       </Modal>
     </View>
+    </AnimatedScreenWrapper>
   );
 }
 

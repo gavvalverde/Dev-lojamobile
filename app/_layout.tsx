@@ -11,12 +11,14 @@ export default function RootLayout() {
           screenOptions={{
             headerShown: false,
             tabBarShowLabel: false,
+            animation: "shift",
           }}
           tabBar={(props) => <BottomTabBar {...props} />}
         >
           <Tabs.Screen name="views/ProfileView" />
           <Tabs.Screen name="views/FavoritesView" />
           <Tabs.Screen name="views/HomeView" />
+          <Tabs.Screen name="views/CatalogView" />
           <Tabs.Screen name="views/MyCardsView" />
           <Tabs.Screen name="views/AuctionView" />
           <Tabs.Screen name="views/UsersManagementView" />

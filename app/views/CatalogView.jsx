@@ -19,6 +19,7 @@ import { FavoritesService } from "../services/FavoritesService";
 import { MyCardsService } from "../services/MyCardsService";
 import { PokemonService } from "../services/PokemonService";
 import { UserService } from "../services/UserService";
+import AnimatedScreenWrapper from "../components/AnimatedScreenWrapper";
 import { useAppTheme } from "../services/AppThemeContext";
 
 function formatCurrency(value) {
@@ -158,133 +159,132 @@ export default function CatalogView() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title={`Catálogo TCG`} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
+    <AnimatedScreenWrapper>
+      <View style={[styles.screen, { backgroundColor: colors.background }]}>
+        <TopDropDownMenu title={`Catálogo TCG`} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
 
-      <FlatList
-        key={numColumns}
-        data={cardResults}
-        renderItem={renderCard}
-        keyExtractor={(item) => String(item.card.id)}
-        numColumns={numColumns}
-        contentContainerStyle={[
-          { padding: spacing },
-          cardResults.length === 0 && styles.emptyList,
-        ]}
-        columnWrapperStyle={{ justifyContent: "space-between", marginBottom: spacing }}
-        ListHeaderComponent={
-          <View>
-            <TextInput
-              placeholder="Buscar cartas Pokemon TCG"
-              value={search}
-              onChangeText={setSearch}
-              placeholderTextColor={colors.mutedText}
-              style={[
-                styles.searchInput,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                  color: colors.text,
-                },
-              ]}
-            />
+        <FlatList
+          key={numColumns}
+          data={cardResults}
+          renderItem={renderCard}
+          keyExtractor={(item) => String(item.card.id)}
+          numColumns={numColumns}
+          contentContainerStyle={[
+            { padding: spacing },
+            cardResults.length === 0 && styles.emptyList,
+          ]}
+          columnWrapperStyle={{ justifyContent: "space-between", marginBottom: spacing }}
+          ListHeaderComponent={
+            <View>
+              <TextInput
+                placeholder="Buscar cartas Pokemon TCG"
+                value={search}
+                onChangeText={setSearch}
+                placeholderTextColor={colors.mutedText}
+                style={[
+                  styles.searchInput,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+              />
 
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {search.trim() ? "Resultados da busca" : "Busque por cartas"}
-            </Text>
-            {searchLoading && (
-              <View style={styles.loadingContainer}>
-                <Image
-                  source={require('../../assets/images/backgrounds/load.gif')}
-                  style={styles.loadingGif}
-                />
-                <Text style={[styles.searchStatus, { color: colors.mutedText }]}>Buscando na API...</Text>
-              </View>
-            )}
-            {!!searchError && (
-              <Text style={[styles.searchError, { color: colors.danger }]}>{searchError}</Text>
-            )}
-          </View>
-        }
-        ListEmptyComponent={
-          !searchLoading ? (
-            <View style={styles.emptyState}>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                {search.trim() ? "Nenhuma carta encontrada" : "Bem-vindo ao Catálogo TCG"}
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                {search.trim() ? "Resultados da busca" : "Busque por cartas"}
               </Text>
-              <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-                {search.trim()
-                  ? "Tente buscar por outro nome de carta Pokemon TCG."
-                  : "Digite o nome de uma carta acima para realizar a busca."}
-              </Text>
-              
+              {searchLoading && (
+                <View style={styles.loadingContainer}>
+                  <Image
+                    source={require("../../assets/images/backgrounds/load.gif")}
+                    style={styles.loadingGif}
+                  />
+                  <Text style={[styles.searchStatus, { color: colors.mutedText }]}>Buscando na API...</Text>
+                </View>
+              )}
+              {!!searchError && (
+                <Text style={[styles.searchError, { color: colors.danger }]}>{searchError}</Text>
+              )}
             </View>
-          ) : null
-        }
-      />
+          }
+          ListEmptyComponent={
+            !searchLoading ? (
+              <View style={styles.emptyState}>
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                  {search.trim() ? "Nenhuma carta encontrada" : "Bem-vindo ao Catálogo TCG"}
+                </Text>
+                <Text style={[styles.emptyText, { color: colors.mutedText }]}>
+                  {search.trim()
+                    ? "Tente buscar por outro nome de carta Pokemon TCG."
+                    : "Digite o nome de uma carta acima para realizar a busca."}
+                </Text>
+              </View>
+            ) : null
+          }
+        />
 
-      
-
-      <Modal
-        animationType="fade"
-        transparent
-        visible={quantityModalVisible}
-        onRequestClose={() => setQuantityModalVisible(false)}
-      >
-        <Pressable
-          style={[styles.quantityModalOverlay, { backgroundColor: colors.overlay }]}
-          onPress={() => setQuantityModalVisible(false)}
+        <Modal
+          animationType="fade"
+          transparent
+          visible={quantityModalVisible}
+          onRequestClose={() => setQuantityModalVisible(false)}
         >
           <Pressable
-            style={[styles.quantityModalCard, { backgroundColor: colors.surface }]}
-            onPress={(event) => event.stopPropagation()}
+            style={[styles.quantityModalOverlay, { backgroundColor: colors.overlay }]}
+            onPress={() => setQuantityModalVisible(false)}
           >
-            <Text style={[styles.quantityModalTitle, { color: colors.text }]}>Adicionar às minhas cartas</Text>
-            <Text style={[styles.quantityModalSubtitle, { color: colors.mutedText }]}> 
-              {selectedMyCard?.name || "Carta selecionada"}
-            </Text>
-            <Text style={[styles.quantityModalHint, { color: colors.mutedText }]}>Quantas cópias deseja adicionar?</Text>
+            <Pressable
+              style={[styles.quantityModalCard, { backgroundColor: colors.surface }]}
+              onPress={(event) => event.stopPropagation()}
+            >
+              <Text style={[styles.quantityModalTitle, { color: colors.text }]}>Adicionar às minhas cartas</Text>
+              <Text style={[styles.quantityModalSubtitle, { color: colors.mutedText }]}>
+                {selectedMyCard?.name || "Carta selecionada"}
+              </Text>
+              <Text style={[styles.quantityModalHint, { color: colors.mutedText }]}>Quantas cópias deseja adicionar?</Text>
 
-            <TextInput
-              keyboardType="number-pad"
-              value={quantityToAdd}
-              onChangeText={setQuantityToAdd}
-              placeholder="1"
-              placeholderTextColor={colors.mutedText}
-              style={[
-                styles.quantityModalInput,
-                {
-                  borderColor: colors.border,
-                  color: colors.text,
-                  backgroundColor: colors.surfaceVariant,
-                },
-              ]}
-            />
+              <TextInput
+                keyboardType="number-pad"
+                value={quantityToAdd}
+                onChangeText={setQuantityToAdd}
+                placeholder="1"
+                placeholderTextColor={colors.mutedText}
+                style={[
+                  styles.quantityModalInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                    backgroundColor: colors.surfaceVariant,
+                  },
+                ]}
+              />
 
-            {!!selectedMyCard && (
-              <Text style={[styles.quantityModalFootnote, { color: colors.mutedText }]}>Atual: {MyCardsService.getQuantity(selectedMyCard.id)} cópia(s) na coleção.</Text>
-            )}
+              {!!selectedMyCard && (
+                <Text style={[styles.quantityModalFootnote, { color: colors.mutedText }]}>Atual: {MyCardsService.getQuantity(selectedMyCard.id)} cópia(s) na coleção.</Text>
+              )}
 
-            <View style={styles.quantityModalActions}>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => setQuantityModalVisible(false)}
-                style={[styles.quantityModalButton, { backgroundColor: colors.surfaceVariant }]}
-              >
-                <Text style={[styles.quantityModalCancelText, { color: colors.text }]}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={confirmAddMyCard}
-                style={[styles.quantityModalButton, { backgroundColor: colors.primary }]}
-              >
-                <Text style={styles.quantityModalConfirmText}>Adicionar</Text>
-              </TouchableOpacity>
-            </View>
+              <View style={styles.quantityModalActions}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setQuantityModalVisible(false)}
+                  style={[styles.quantityModalButton, { backgroundColor: colors.surfaceVariant }]}
+                >
+                  <Text style={[styles.quantityModalCancelText, { color: colors.text }]}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={confirmAddMyCard}
+                  style={[styles.quantityModalButton, { backgroundColor: colors.primary }]}
+                >
+                  <Text style={styles.quantityModalConfirmText}>Adicionar</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
           </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </AnimatedScreenWrapper>
   );
 }
 
