@@ -1,16 +1,16 @@
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-    FlatList,
+  FlatList,
   Modal,
   Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
-    Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+  Image,
 } from "react-native";
 import { CardSearchResult } from "../components/CardSearchResult";
 import { CartModal } from "../components/CartModal";
@@ -61,7 +61,7 @@ export default function HomeView() {
       if (session?.coverPhoto) {
         setUserCoverPhoto(session.coverPhoto);
       }
-      if ('useCoverPhotoInHeader' in session) {
+      if ("useCoverPhotoInHeader" in session) {
         setUseCoverPhotoInHeader(session.useCoverPhotoInHeader);
       }
     };
@@ -85,7 +85,10 @@ export default function HomeView() {
   }, [myCards]);
 
   const cartTotal = CartService.getTotal(cartItems);
-  const cartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const cartQuantity = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0,
+  );
 
   const formatCardCode = (item) => {
     return item.collectionNumber || item.id;
@@ -125,142 +128,198 @@ export default function HomeView() {
 
   return (
     <AnimatedScreenWrapper>
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <TopDropDownMenu title={`Bem Vindo - ${userName}`} backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null} />
+      <View style={[styles.screen, { backgroundColor: colors.background }]}>
+        <TopDropDownMenu
+          title={`Bem Vindo - ${userName}`}
+          backgroundImage={useCoverPhotoInHeader ? userCoverPhoto : null}
+        />
 
-      <View
-        style={[
-          styles.cartSummary,
-          { backgroundColor: colors.surface, borderTopColor: colors.border },
-        ]}
-      >
-        <View>
-          <Text style={[styles.cartSummaryLabel, { color: colors.mutedText }]}>Carrinho</Text>
-          <Text style={[styles.cartSummaryText, { color: colors.text }]}>
-            {cartQuantity} item(ns) - {formatCurrency(cartTotal)}
-          </Text>
-        </View>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => setCartVisible(true)}
-          style={[styles.cartButton, { backgroundColor: colors.secondary }]}
+        <View
+          style={[
+            styles.cartSummary,
+            { backgroundColor: colors.surface, borderTopColor: colors.border },
+          ]}
         >
-          <Text style={styles.cartButtonText}>Ver carrinho</Text>
-        </TouchableOpacity>
-      </View>
-      <FlatList
-        key={numColumns}
-        data={cardResults}
-        renderItem={renderCard}
-        keyExtractor={(item) => String(item.card.id)}
-        numColumns={numColumns}
-        contentContainerStyle={[
-          { padding: spacing },
-          cardResults.length === 0 && styles.emptyList,
-        ]}
-        columnWrapperStyle={{ justifyContent: "space-between", marginBottom: spacing }}
-        ListHeaderComponent={
           <View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Cartas à venda
-            </Text>
-          </View>
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              Nenhuma carta à venda
-            </Text>
-            <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-              Vá em Minhas Cartas, toque em Editar e marque uma carta como item à venda.
-            </Text>
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => router.push("/views/MyCardsView")}
-              style={[styles.emptyButton, { backgroundColor: colors.primary }]}
+            <Text
+              style={[styles.cartSummaryLabel, { color: colors.mutedText }]}
             >
-              <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
-            </TouchableOpacity>
-          </View>
-        }
-      />
-
-      <CartModal
-        visible={cartVisible}
-        items={cartItems}
-        total={cartTotal}
-        onClose={() => setCartVisible(false)}
-        onClear={() => CartService.clear()}
-        onUpdateQuantity={(id, quantity) => CartService.updateQuantity(id, quantity)}
-        onRemoveItem={(id) => CartService.removeItem(id)}
-        onCheckout={() => {
-          // Simulação de checkout - em um app real, isso enviaria para API
-          alert(`Compra finalizada! Total: R$ ${cartTotal.toFixed(2).replace('.', ',')}`);
-          CartService.clear();
-          setCartVisible(false);
-        }}
-      />
-
-      <Modal
-        animationType="fade"
-        transparent
-        visible={quantityModalVisible}
-        onRequestClose={() => setQuantityModalVisible(false)}
-      >
-        <Pressable
-          style={[styles.quantityModalOverlay, { backgroundColor: colors.overlay }]}
-          onPress={() => setQuantityModalVisible(false)}
-        >
-          <Pressable
-            style={[styles.quantityModalCard, { backgroundColor: colors.surface }]}
-            onPress={(event) => event.stopPropagation()}
-          >
-            <Text style={[styles.quantityModalTitle, { color: colors.text }]}>Adicionar às minhas cartas</Text>
-            <Text style={[styles.quantityModalSubtitle, { color: colors.mutedText }]}> 
-              {selectedMyCard?.name || "Carta selecionada"}
+              Carrinho
             </Text>
-            <Text style={[styles.quantityModalHint, { color: colors.mutedText }]}>Quantas cópias deseja adicionar?</Text>
-
-            <TextInput
-              keyboardType="number-pad"
-              value={quantityToAdd}
-              onChangeText={setQuantityToAdd}
-              placeholder="1"
-              placeholderTextColor={colors.mutedText}
-              style={[
-                styles.quantityModalInput,
-                {
-                  borderColor: colors.border,
-                  color: colors.text,
-                  backgroundColor: colors.surfaceVariant,
-                },
-              ]}
-            />
-
-            {!!selectedMyCard && (
-              <Text style={[styles.quantityModalFootnote, { color: colors.mutedText }]}>Atual: {MyCardsService.getQuantity(selectedMyCard.id)} cópia(s) na coleção.</Text>
-            )}
-
-            <View style={styles.quantityModalActions}>
+            <Text style={[styles.cartSummaryText, { color: colors.text }]}>
+              {cartQuantity} item(ns) - {formatCurrency(cartTotal)}
+            </Text>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => setCartVisible(true)}
+            style={[styles.cartButton, { backgroundColor: colors.secondary }]}
+          >
+            <Text style={styles.cartButtonText}>Ver carrinho</Text>
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          key={numColumns}
+          data={cardResults}
+          renderItem={renderCard}
+          keyExtractor={(item) => String(item.card.id)}
+          numColumns={numColumns}
+          contentContainerStyle={[
+            { padding: spacing },
+            cardResults.length === 0 && styles.emptyList,
+          ]}
+          columnWrapperStyle={{
+            justifyContent: "space-between",
+            marginBottom: spacing,
+          }}
+          ListHeaderComponent={
+            <View>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Cartas à venda
+              </Text>
+            </View>
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                Nenhuma carta à venda
+              </Text>
+              <Text style={[styles.emptyText, { color: colors.mutedText }]}>
+                Vá em Minhas Cartas, toque em Editar e marque uma carta como
+                item à venda.
+              </Text>
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => setQuantityModalVisible(false)}
-                style={[styles.quantityModalButton, { backgroundColor: colors.surfaceVariant }]}
+                onPress={() => router.push("/views/MyCardsView")}
+                style={[
+                  styles.emptyButton,
+                  { backgroundColor: colors.primary },
+                ]}
               >
-                <Text style={[styles.quantityModalCancelText, { color: colors.text }]}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={confirmAddMyCard}
-                style={[styles.quantityModalButton, { backgroundColor: colors.primary }]}
-              >
-                <Text style={styles.quantityModalConfirmText}>Adicionar</Text>
+                <Text style={styles.emptyButtonText}>Abrir minhas cartas</Text>
               </TouchableOpacity>
             </View>
+          }
+        />
+
+        <CartModal
+          visible={cartVisible}
+          items={cartItems}
+          total={cartTotal}
+          onClose={() => setCartVisible(false)}
+          onClear={() => CartService.clear()}
+          onUpdateQuantity={(id, quantity) =>
+            CartService.updateQuantity(id, quantity)
+          }
+          onRemoveItem={(id) => CartService.removeItem(id)}
+          onCheckout={() => {
+            // Simulação de checkout - em um app real, isso enviaria para API
+            alert(
+              `Compra finalizada! Total: R$ ${cartTotal.toFixed(2).replace(".", ",")}`,
+            );
+            CartService.clear();
+            setCartVisible(false);
+          }}
+        />
+
+        <Modal
+          animationType="fade"
+          transparent
+          visible={quantityModalVisible}
+          onRequestClose={() => setQuantityModalVisible(false)}
+        >
+          <Pressable
+            style={[
+              styles.quantityModalOverlay,
+              { backgroundColor: colors.overlay },
+            ]}
+            onPress={() => setQuantityModalVisible(false)}
+          >
+            <Pressable
+              style={[
+                styles.quantityModalCard,
+                { backgroundColor: colors.surface },
+              ]}
+              onPress={(event) => event.stopPropagation()}
+            >
+              <Text style={[styles.quantityModalTitle, { color: colors.text }]}>
+                Adicionar às minhas cartas
+              </Text>
+              <Text
+                style={[
+                  styles.quantityModalSubtitle,
+                  { color: colors.mutedText },
+                ]}
+              >
+                {selectedMyCard?.name || "Carta selecionada"}
+              </Text>
+              <Text
+                style={[styles.quantityModalHint, { color: colors.mutedText }]}
+              >
+                Quantas cópias deseja adicionar?
+              </Text>
+
+              <TextInput
+                keyboardType="number-pad"
+                value={quantityToAdd}
+                onChangeText={setQuantityToAdd}
+                placeholder="1"
+                placeholderTextColor={colors.mutedText}
+                style={[
+                  styles.quantityModalInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                    backgroundColor: colors.surfaceVariant,
+                  },
+                ]}
+              />
+
+              {!!selectedMyCard && (
+                <Text
+                  style={[
+                    styles.quantityModalFootnote,
+                    { color: colors.mutedText },
+                  ]}
+                >
+                  Atual: {MyCardsService.getQuantity(selectedMyCard.id)}{" "}
+                  cópia(s) na coleção.
+                </Text>
+              )}
+
+              <View style={styles.quantityModalActions}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setQuantityModalVisible(false)}
+                  style={[
+                    styles.quantityModalButton,
+                    { backgroundColor: colors.surfaceVariant },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.quantityModalCancelText,
+                      { color: colors.text },
+                    ]}
+                  >
+                    Cancelar
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={confirmAddMyCard}
+                  style={[
+                    styles.quantityModalButton,
+                    { backgroundColor: colors.primary },
+                  ]}
+                >
+                  <Text style={styles.quantityModalConfirmText}>Adicionar</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
           </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
     </AnimatedScreenWrapper>
   );
 }
@@ -270,24 +329,33 @@ const styles = StyleSheet.create({
   cartSummary: {
     alignItems: "center",
     borderTopWidth: 1,
+    borderBottomWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cartSummaryLabel: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   cartSummaryText: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginTop: 2,
+    fontSize: 15,
+    fontWeight: "800",
+    marginTop: 3,
   },
   cartButton: {
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
   },
   cartButtonText: {
     color: "#fff",
@@ -300,9 +368,11 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 22,
+    fontWeight: "900",
     marginLeft: 4,
+    marginBottom: 12,
+    marginTop: 4,
   },
   searchStatus: {
     fontSize: 13,
