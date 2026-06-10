@@ -17,22 +17,11 @@ import LoadingDuck from "./LoadingDuck";
 import { useAppTheme } from "../services/AppThemeContext";
 import { PokemonService } from "../services/PokemonService";
 import { UserService } from "../services/UserService";
-
-const profilePanelOptions = [
-  { id: "stats", label: "Resumo", icon: "chart-box-outline" },
-  { id: "showcase", label: "Vitrine", icon: "cards-outline" },
-  { id: "mural", label: "Mural", icon: "post-outline" },
-  { id: "contact", label: "Contato", icon: "card-account-phone-outline" },
-];
-
-function normalizePanelOrder(order) {
-  const knownIds = profilePanelOptions.map((panel) => panel.id);
-  const selectedIds = Array.isArray(order)
-    ? order.filter((id) => knownIds.includes(id))
-    : [];
-
-  return [...selectedIds, ...knownIds.filter((id) => !selectedIds.includes(id))];
-}
+import {
+  buildProfileColors,
+  normalizeProfilePanelOrder,
+  PROFILE_PANEL_OPTIONS,
+} from "../../utils/profile";
 
 function normalizeHandle(value) {
   return String(value ?? "")
@@ -107,22 +96,6 @@ function hexToHsv(hexColor) {
   };
 }
 
-function buildProfileColors(user, colors) {
-  const savedColors = user?.profileColors && typeof user.profileColors === "object"
-    ? user.profileColors
-    : {};
-
-  return {
-    primary: savedColors.primary || user?.themeColor || colors.accent,
-    theme: savedColors.theme || "custom",
-    background: savedColors.background || colors.surface,
-    surface: savedColors.surface || colors.surface,
-    text: savedColors.text || colors.text,
-    mutedText: savedColors.mutedText || colors.mutedText,
-    border: savedColors.border || colors.border,
-  };
-}
-
 function buildProfileForm(user, colors) {
   const profileColors = buildProfileColors(user, colors);
 
@@ -142,7 +115,7 @@ function buildProfileForm(user, colors) {
     coverPhoto: user?.coverPhoto || null,
     themeColor: profileColors.primary,
     profileColors,
-    profilePanelOrder: normalizePanelOrder(user?.profilePanelOrder),
+    profilePanelOrder: normalizeProfilePanelOrder(user?.profilePanelOrder),
     hiddenProfilePanels: Array.isArray(user?.hiddenProfilePanels) ? user.hiddenProfilePanels : [],
   };
 }
@@ -151,13 +124,10 @@ function getCardCode(card) {
   return card?.collectionNumber || card?.id || "";
 }
 
-export default function ProfileEditModal({ user, onSave, onCancel }) {
-  const { theme } = useAppTheme();
-  const colors = theme.colors;
+function useProfileEditState(user, colors) {
   const initialProfileColors = buildProfileColors(user, colors);
   const profileFormKey = JSON.stringify(buildProfileForm(user, colors));
   const [form, setForm] = useState(() => buildProfileForm(user, colors));
-  const [loading, setLoading] = useState(false);
   const [customColor, setCustomColor] = useState(initialProfileColors.primary);
   const [favoriteSearch, setFavoriteSearch] = useState(user?.favoritePokemon || "");
   const [favoriteResults, setFavoriteResults] = useState([]);
@@ -216,6 +186,47 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
+
+  return {
+    activeColorPicker,
+    customColor,
+    favoriteResults,
+    favoriteSearch,
+    favoriteSearchError,
+    favoriteSearchLoading,
+    form,
+    pickerHue,
+    setActiveColorPicker,
+    setCustomColor,
+    setFavoriteResults,
+    setFavoriteSearch,
+    setForm,
+    setPickerHue,
+    updateField,
+  };
+}
+
+export default function ProfileEditModal({ user, onSave, onCancel }) {
+  const { theme } = useAppTheme();
+  const colors = theme.colors;
+  const [loading, setLoading] = useState(false);
+  const {
+    activeColorPicker,
+    customColor,
+    favoriteResults,
+    favoriteSearch,
+    favoriteSearchError,
+    favoriteSearchLoading,
+    form,
+    pickerHue,
+    setActiveColorPicker,
+    setCustomColor,
+    setFavoriteResults,
+    setFavoriteSearch,
+    setForm,
+    setPickerHue,
+    updateField,
+  } = useProfileEditState(user, colors);
 
   const pickImage = async (field, aspect) => {
     try {
@@ -292,7 +303,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
 
   const moveProfilePanel = (panelId, direction) => {
     setForm((current) => {
-      const order = normalizePanelOrder(current.profilePanelOrder);
+      const order = normalizeProfilePanelOrder(current.profilePanelOrder);
       const index = order.indexOf(panelId);
       const nextIndex = index + direction;
 
@@ -343,7 +354,7 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
         tradePreferences: form.tradePreferences.trim(),
         phone: form.phone.trim(),
         bio: form.bio.trim(),
-        profilePanelOrder: normalizePanelOrder(form.profilePanelOrder),
+        profilePanelOrder: normalizeProfilePanelOrder(form.profilePanelOrder),
         hiddenProfilePanels: form.hiddenProfilePanels,
       });
     } catch (error) {
@@ -645,8 +656,8 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.mutedText }]}>Paineis do perfil</Text>
-          {normalizePanelOrder(form.profilePanelOrder).map((panelId, index) => {
-            const panel = profilePanelOptions.find((item) => item.id === panelId);
+          {normalizeProfilePanelOrder(form.profilePanelOrder).map((panelId, index) => {
+            const panel = PROFILE_PANEL_OPTIONS.find((item) => item.id === panelId);
             if (!panel) return null;
 
             const visible = !form.hiddenProfilePanels.includes(panelId);
@@ -679,11 +690,11 @@ export default function ProfileEditModal({ user, onSave, onCancel }) {
                 </TouchableOpacity>
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  disabled={index === profilePanelOptions.length - 1}
+                  disabled={index === PROFILE_PANEL_OPTIONS.length - 1}
                   onPress={() => moveProfilePanel(panel.id, 1)}
                   style={[
                     styles.panelMoveButton,
-                    index === profilePanelOptions.length - 1 && styles.panelMoveButtonDisabled,
+                    index === PROFILE_PANEL_OPTIONS.length - 1 && styles.panelMoveButtonDisabled,
                   ]}
                 >
                   <MaterialCommunityIcons name="chevron-down" size={22} color={colors.text} />

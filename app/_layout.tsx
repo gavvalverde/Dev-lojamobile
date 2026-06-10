@@ -41,7 +41,7 @@ function SwipeableTabs() {
     });
   }, []);
 
-  // Reseta a animação e o preview quando o gesto de swipe termina ou é cancelado.
+  // Reseta a animacao e o preview quando o gesto de swipe termina ou e cancelado.
   const resetSwipe = useCallback(() => {
     Animated.parallel([
       Animated.spring(translateX, {
@@ -59,7 +59,7 @@ function SwipeableTabs() {
     ]).start(() => setPreviewRoute(null));
   }, [previewOpacity, translateX]);
 
-  // Cria o PanResponder de swipe apenas quando as dependências mudam.
+  // Cria o PanResponder de swipe apenas quando as dependencias mudam.
   const panResponder = useMemo(
     () =>
       PanResponder.create({

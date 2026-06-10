@@ -19,6 +19,7 @@ import TopDropDownMenu from "../components/TopDropDownMenu";
 import { AuthService } from "../services/AuthService";
 import { useAppTheme } from "../services/AppThemeContext";
 import { UserService } from "../services/UserService";
+import { getPublicHandle } from "../../utils/profile";
 
 const auctionBadge = "Leilao";
 const quickBadges = ["Duck", "Vendedor", "Colecionador", "Trocas"];
@@ -35,11 +36,6 @@ function normalizeSearch(value) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
-}
-
-function getPublicHandle(user) {
-  if (user?.handle) return `@${user.handle}`;
-  return user?.email ?? "";
 }
 
 function getBadgeLabel(badge) {
@@ -224,7 +220,7 @@ export default function UsersManagementView() {
                 <Text style={[styles.userRoleText, { color: colors.primary }]}>Administrador</Text>
               </View>
             )}
-            <Text style={[styles.userMeta, { color: colors.mutedText }]}>{getPublicHandle(item)}</Text>
+            <Text style={[styles.userMeta, { color: colors.mutedText }]}>{getPublicHandle(item, item.email ?? "")}</Text>
             <View style={styles.userInfoRow}>
               <MaterialCommunityIcons name="email-outline" size={14} color={colors.mutedText} />
               <Text numberOfLines={1} style={[styles.userMeta, styles.userInfoText, { color: colors.mutedText }]}>{item.email}</Text>

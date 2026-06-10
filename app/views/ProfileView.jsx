@@ -25,6 +25,11 @@ import { PokemonService } from "../services/PokemonService";
 import { ProfilePostService } from "../services/ProfilePostService";
 import { UserService } from "../services/UserService";
 import { useAppTheme } from "../services/AppThemeContext";
+import {
+  buildProfileColors,
+  getPublicHandle,
+  normalizeProfilePanelOrder,
+} from "../../utils/profile";
 
 function getInitials(name) {
   return String(name ?? "")
@@ -34,11 +39,6 @@ function getInitials(name) {
     .map((part) => part[0])
     .join("")
     .toUpperCase();
-}
-
-function getPublicHandle(user) {
-  if (user?.handle) return `@${user.handle}`;
-  return `@${String(user?.name ?? "perfil").trim().toLowerCase().replace(/\s+/g, ".")}`;
 }
 
 function formatPostTime(value) {
@@ -54,22 +54,6 @@ function formatPostTime(value) {
 
 function getCardCode(card) {
   return card?.collectionNumber || card?.id || "";
-}
-
-function buildProfileColors(user, colors) {
-  const savedColors = user?.profileColors && typeof user.profileColors === "object"
-    ? user.profileColors
-    : {};
-
-  return {
-    primary: savedColors.primary || user?.themeColor || colors.accent,
-    theme: savedColors.theme || "custom",
-    background: savedColors.background || colors.surface,
-    surface: savedColors.surface || colors.surface,
-    text: savedColors.text || colors.text,
-    mutedText: savedColors.mutedText || colors.mutedText,
-    border: savedColors.border || colors.border,
-  };
 }
 
 function formatCurrency(value) {
@@ -98,20 +82,8 @@ function postSortDate(post, profileUserId) {
   return new Date(post.createdAt);
 }
 
-const defaultProfilePanelOrder = ["stats", "showcase", "mural", "contact"];
 const wantedQualityOptions = ["NM", "LP", "MP", "HP", "DMG"];
 const wantedTypeOptions = ["Comum", "Foil", "Reverse foil", "Holo", "Promocional"];
-
-function normalizePanelOrder(order) {
-  const selectedIds = Array.isArray(order)
-    ? order.filter((id) => defaultProfilePanelOrder.includes(id))
-    : [];
-
-  return [
-    ...selectedIds,
-    ...defaultProfilePanelOrder.filter((id) => !selectedIds.includes(id)),
-  ];
-}
 
 function cardBelongsToUser(card, userId) {
   if (!userId) return false;
@@ -710,7 +682,7 @@ export default function ProfileView() {
   const profileBorder = profileColors.border;
   const isOwnProfile = !isPublicProfile;
   const isFollowing = !!sessionUser?.followingIds?.includes(user.id);
-  const visibleProfilePanels = normalizePanelOrder(user.profilePanelOrder).filter(
+  const visibleProfilePanels = normalizeProfilePanelOrder(user.profilePanelOrder).filter(
     (panelId) => !(user.hiddenProfilePanels ?? []).includes(panelId)
   );
   const levelInfo = UserService.getLevelInfo(user.experience);
